@@ -10,7 +10,8 @@ AC_PROG_LIBTOOL()
 AC_LANG([C++])
 
 PKG_CHECK_MODULES([CORE],
-                  [gom-1.0])
+                  [gom-1.0
+                  gtkmm-3.0])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT()

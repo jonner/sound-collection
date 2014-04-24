@@ -1,4 +1,6 @@
 #include <gom/gom.h>
+#include <gio/gio.h>
+#include <gtkmm.h>
 #include "sound-collection-app.h"
 #include "recording-resource.h"
 #include "GRefPtr.h"
@@ -7,62 +9,50 @@ struct SoundCollectionApp::Priv
 {
     Priv()
         : status(0)
-        , mainloop(g_main_loop_new(0, FALSE))
-        , adapter(gom_adapter_new())
     {
     }
     
     int status;
-    WTF::GRefPtr<GFile> db;
-    WTF::GRefPtr<GMainLoop> mainloop;
+    Glib::RefPtr<Gio::File> db;
     WTF::GRefPtr<GomAdapter> adapter;
     WTF::GRefPtr<GomRepository> repository;
+    Gtk::ApplicationWindow window;
 };
 
+Glib::RefPtr<SoundCollectionApp> SoundCollectionApp::create()
+{
+    return Glib::RefPtr<SoundCollectionApp>(new SoundCollectionApp());
+}
 
 SoundCollectionApp::SoundCollectionApp()
-    : m_priv(new Priv())
+    : Gtk::Application("org.quotidian.SoundCollection", Gio::APPLICATION_HANDLES_COMMAND_LINE)
+    , m_priv(new Priv())
 {
 }
 
-
-static gchar* filename;
-static GOptionEntry entries[] =
+int SoundCollectionApp::on_command_line(const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line)
 {
-    { "db", 'd', G_OPTION_FLAG_FILENAME, G_OPTION_ARG_FILENAME, filename, "database", 0 },
-};
-
-int SoundCollectionApp::run(int argc, char** argv)
-{
-    GOptionContext* option_context = g_option_context_new("");
-    GError* error = 0;
-    if (!g_option_context_parse(option_context, &argc, &argv, &error))
-    {
-        g_warning(error->message);
-        g_error_free(error);
-    }
+    int argc = 0;
+    char** argv = command_line->get_arguments(argc);
+    g_debug("Got commandline: %i elements", argc);
     
-    g_debug("argc = %i", argc);
+        g_debug("argc = %i", argc);
     if (argc > 1)
-        m_priv->db = g_file_new_for_path(argv[1]);
+        m_priv->db = command_line->create_file_for_arg(argv[1]);
     else
-        m_priv->db = g_file_new_for_path("sound-collection.sqlite");
-        
-    char* uri = g_file_get_uri(m_priv->db.get());
-    g_debug("Opening db %s...", uri);
+        m_priv->db = command_line->create_file_for_arg("sound-collection.sqlite");
+
+    std::string uri = m_priv->db->get_uri();
+    g_debug("Opening db %s...", uri.c_str());
+
+    m_priv->adapter = gom_adapter_new();
+    gom_adapter_open_async(m_priv->adapter.get(), uri.c_str(), SoundCollectionApp::adapter_open_ready, this);
+
+    g_strfreev(argv);
     
-    gom_adapter_open_async(m_priv->adapter.get(), uri, SoundCollectionApp::adapter_open_ready, this);
-    g_free(uri);
-        
-    g_main_loop_run(m_priv->mainloop.get());
-    return m_priv->status;
+    add_window(m_priv->window);
+    return 0;
 }
-
-void SoundCollectionApp::quit()
-{
-    g_main_loop_quit(m_priv->mainloop.get());
-}
-
 
 void SoundCollectionApp::adapter_open_ready(GObject* source_object, GAsyncResult* res, gpointer user_data)
 {
@@ -105,6 +95,5 @@ void SoundCollectionApp::repository_migrate_finished(GObject* source_object, GAs
 
 void SoundCollectionApp::show()
 {
-    //for now, just exit
-    quit();
+    m_priv->window.show();
 }

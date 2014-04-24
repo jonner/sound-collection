@@ -24,6 +24,6 @@
 
 int main(int argc, char** argv)
 {
-    SoundCollectionApp app;
-    return app.run(argc, argv);
+    Glib::RefPtr<SoundCollectionApp> app = SoundCollectionApp::create();
+    return app->run(argc, argv);
 }
