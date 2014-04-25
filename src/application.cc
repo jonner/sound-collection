@@ -20,10 +20,10 @@
 
 #include <gio/gio.h>
 #include <gom/gom.h>
-#include <gtkmm.h>
 
 #include "application.h"
 #include "GRefPtr.h"
+#include "main-window.h"
 #include "recording-resource.h"
 
 #define REPOSITORY_VERSION 2
@@ -37,7 +37,7 @@ struct Application::Priv {
   Glib::RefPtr<Gio::File> db;
   WTF::GRefPtr<GomAdapter> adapter;
   WTF::GRefPtr<GomRepository> repository;
-  Gtk::ApplicationWindow window;
+  MainWindow window;
 };
 
 Glib::RefPtr<Application> Application::create() {
