@@ -26,6 +26,8 @@
 #include "recording-resource.h"
 #include "sound-collection-app.h"
 
+#define REPOSITORY_VERSION 2
+
 struct SoundCollectionApp::Priv {
   Priv() : status(0) {}
 
@@ -63,7 +65,7 @@ int SoundCollectionApp::on_command_line(
   m_priv->adapter = gom_adapter_new();
   gom_adapter_open_async(m_priv->adapter.get(),
                          uri.c_str(),
-                         SoundCollectionApp::adapter_open_ready,
+                         SoundCollectionApp::adapter_open_ready_proxy,
                          this);
 
   g_strfreev(argv);
@@ -72,47 +74,59 @@ int SoundCollectionApp::on_command_line(
   return 0;
 }
 
-void SoundCollectionApp::adapter_open_ready(GObject* source_object,
-                                            GAsyncResult* res,
-                                            gpointer user_data) {
+void SoundCollectionApp::adapter_open_ready(GomAdapter* adapter,
+                                            GAsyncResult* res) {
   g_debug("%s", G_STRFUNC);
-  SoundCollectionApp* self = static_cast<SoundCollectionApp*>(user_data);
   GError* error = 0;
-  if (!gom_adapter_open_finish(
-          reinterpret_cast<GomAdapter*>(source_object), res, &error)) {
+  if (!gom_adapter_open_finish(adapter, res, &error)) {
     g_warning("failed to open adapter: %s", error->message);
     g_error_free(error);
-    self->m_priv->status = -1;
-    self->quit();
+    m_priv->status = -1;
+    quit();
   } else
     g_debug("Opened adapter");
 
-  self->m_priv->repository = gom_repository_new(self->m_priv->adapter.get());
+  m_priv->repository = gom_repository_new(m_priv->adapter.get());
   GList* types = g_list_prepend(0, GINT_TO_POINTER(SC_TYPE_RECORDING_RESOURCE));
   gom_repository_automatic_migrate_async(
-      self->m_priv->repository.get(),
-      1,
+      m_priv->repository.get(),
+      REPOSITORY_VERSION,
       types,
-      SoundCollectionApp::repository_migrate_finished,
-      self);
+      SoundCollectionApp::repository_migrate_finished_proxy,
+      this);
 }
 
-void SoundCollectionApp::repository_migrate_finished(GObject* source_object,
-                                                     GAsyncResult* res,
-                                                     gpointer user_data) {
-  g_debug("%s", G_STRFUNC);
+void SoundCollectionApp::adapter_open_ready_proxy(GObject* source_object,
+                                                  GAsyncResult* res,
+                                                  gpointer user_data) {
   SoundCollectionApp* self = static_cast<SoundCollectionApp*>(user_data);
+  GomAdapter* adapter = reinterpret_cast<GomAdapter*>(source_object);
+
+  self->adapter_open_ready(adapter, res);
+}
+
+void SoundCollectionApp::repository_migrate_finished_proxy(
+    GObject* source_object,
+    GAsyncResult* res,
+    gpointer user_data) {
+  SoundCollectionApp* self = static_cast<SoundCollectionApp*>(user_data);
+  GomRepository* repository = reinterpret_cast<GomRepository*>(source_object);
+  self->repository_migrate_finished(repository, res);
+}
+
+void SoundCollectionApp::repository_migrate_finished(GomRepository* repository,
+                                                     GAsyncResult* res) {
+  g_debug("%s", G_STRFUNC);
   GError* error = 0;
-  if (!gom_repository_automatic_migrate_finish(
-          reinterpret_cast<GomRepository*>(source_object), res, &error)) {
+  if (!gom_repository_automatic_migrate_finish(repository, res, &error)) {
     g_warning("failed to migrate repository: %s", error->message);
     g_error_free(error);
-    self->m_priv->status = -1;
-    self->quit();
+    m_priv->status = -1;
+    quit();
   } else
     g_debug("Repository migrated");
 
-  self->show();
+  show();
 }
 
 void SoundCollectionApp::show() { m_priv->window.show(); }
