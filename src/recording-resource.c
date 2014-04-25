@@ -27,23 +27,33 @@
         (object), SC_TYPE_RECORDING_RESOURCE, ScRecordingResourcePrivate))
 
 struct _ScRecordingResourcePrivate {
-    int id;
-    char* genus;
-    char* species;
-    char* common_name;
+    gint64 id;
+    gfloat length;
+    gint quality;
+    char* recordist;
     GDateTime* date;
-    char* sound_type;
+    char* location;
+    gfloat latitude;
+    gfloat longitude;
+    char* country;
+    gfloat elevation;
+    char* file;
     char* remarks;
 };
 
 enum {
     PROP_0,
     PROP_ID,
-    PROP_GENUS,
-    PROP_SPECIES,
-    PROP_COMMON_NAME,
+    PROP_LENGTH,
+    PROP_QUALITY,
+    PROP_RECORDIST,
     PROP_DATE,
-    PROP_SOUND_TYPE,
+    PROP_LOCATION,
+    PROP_LATITUDE,
+    PROP_LONGITUDE,
+    PROP_COUNTRY,
+    PROP_ELEVATION,
+    PROP_FILE,
     PROP_REMARKS
 };
 
@@ -52,10 +62,10 @@ G_DEFINE_TYPE(ScRecordingResource, sc_recording_resource, GOM_TYPE_RESOURCE)
 static void sc_recording_resource_finalize(GObject* object)
 {
     ScRecordingResource* self = (ScRecordingResource*)object;
-    g_free(self->priv->genus);
-    g_free(self->priv->species);
-    g_free(self->priv->common_name);
-    g_free(self->priv->sound_type);
+    g_free(self->priv->recordist);
+    g_free(self->priv->location);
+    g_free(self->priv->country);
+    g_free(self->priv->file);
     g_free(self->priv->remarks);
     g_date_time_unref(self->priv->date);
 
@@ -73,24 +83,39 @@ static void sc_recording_resource_set_property(GObject* obj,
     case PROP_ID:
         self->priv->id = g_value_get_int64(value);
         break;
-    case PROP_GENUS:
-        g_free(self->priv->genus);
-        self->priv->genus = g_value_dup_string(value);
+    case PROP_LENGTH:
+        self->priv->length = g_value_get_float(value);
         break;
-    case PROP_SPECIES:
-        g_free(self->priv->species);
-        self->priv->species = g_value_dup_string(value);
+    case PROP_QUALITY:
+        self->priv->quality = g_value_get_int(value);
         break;
-    case PROP_COMMON_NAME:
-        g_free(self->priv->common_name);
-        self->priv->common_name = g_value_dup_string(value);
+    case PROP_RECORDIST:
+        g_free(self->priv->recordist);
+        self->priv->recordist = g_value_dup_string(value);
+        break;
+    case PROP_LOCATION:
+        g_free(self->priv->location);
+        self->priv->location = g_value_dup_string(value);
+        break;
+    case PROP_LATITUDE:
+        self->priv->latitude = g_value_get_float(value);
+        break;
+    case PROP_LONGITUDE:
+        self->priv->longitude = g_value_get_float(value);
+        break;
+    case PROP_COUNTRY:
+        g_free(self->priv->country);
+        self->priv->country = g_value_dup_string(value);
+        break;
+    case PROP_ELEVATION:
+        self->priv->elevation = g_value_get_float(value);
+        break;
+    case PROP_FILE:
+        g_free(self->priv->file);
+        self->priv->file = g_value_dup_string(value);
         break;
     case PROP_DATE:
         self->priv->date = g_value_dup_boxed(value);
-        break;
-    case PROP_SOUND_TYPE:
-        g_free(self->priv->sound_type);
-        self->priv->sound_type = g_value_dup_string(value);
         break;
     case PROP_REMARKS:
         g_free(self->priv->remarks);
@@ -112,20 +137,35 @@ static void sc_recording_resource_get_property(GObject* obj,
     case PROP_ID:
         g_value_set_int64(value, self->priv->id);
         break;
-    case PROP_GENUS:
-        g_value_set_string(value, self->priv->genus);
+    case PROP_LENGTH:
+        g_value_set_float(value, self->priv->length);
         break;
-    case PROP_SPECIES:
-        g_value_set_string(value, self->priv->species);
+    case PROP_QUALITY:
+        g_value_set_int(value, self->priv->quality);
         break;
-    case PROP_COMMON_NAME:
-        g_value_set_string(value, self->priv->common_name);
+    case PROP_RECORDIST:
+        g_value_set_string(value, self->priv->recordist);
+        break;
+    case PROP_LOCATION:
+        g_value_set_string(value, self->priv->location);
+        break;
+    case PROP_LATITUDE:
+        g_value_set_float(value, self->priv->latitude);
+        break;
+    case PROP_LONGITUDE:
+        g_value_set_float(value, self->priv->longitude);
+        break;
+    case PROP_COUNTRY:
+        g_value_set_string(value, self->priv->country);
+        break;
+    case PROP_ELEVATION:
+        g_value_set_float(value, self->priv->elevation);
+        break;
+    case PROP_FILE:
+        g_value_set_string(value, self->priv->file);
         break;
     case PROP_DATE:
         g_value_set_boxed(value, self->priv->date);
-        break;
-    case PROP_SOUND_TYPE:
-        g_value_set_string(value, self->priv->sound_type);
         break;
     case PROP_REMARKS:
         g_value_set_string(value, self->priv->remarks);
@@ -155,20 +195,52 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
         g_param_spec_int64(
             "id", NULL, NULL, -1, G_MAXINT64, -1, G_PARAM_READWRITE));
 
-    g_object_class_install_property(
-        object_class,
-        PROP_GENUS,
-        g_param_spec_string("genus", NULL, NULL, NULL, G_PARAM_READWRITE));
+    /*
+
+
+    PROP_ELEVATION,
+    PROP_FILE,
+    PROP_REMARKS
+    */
 
     g_object_class_install_property(
         object_class,
-        PROP_SPECIES,
-        g_param_spec_string("species", NULL, NULL, NULL, G_PARAM_READWRITE));
+        PROP_LENGTH,
+        g_param_spec_float(
+            "length", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -1, G_PARAM_READWRITE));
 
     g_object_class_install_property(
         object_class,
-        PROP_COMMON_NAME,
-        g_param_spec_string("common-name", NULL, NULL, NULL, G_PARAM_READWRITE));
+        PROP_QUALITY,
+        g_param_spec_int(
+            "quality", NULL, NULL, -1, 5, -1, G_PARAM_READWRITE));
+
+    g_object_class_install_property(
+        object_class,
+        PROP_RECORDIST,
+        g_param_spec_string("recordist", NULL, NULL, NULL, G_PARAM_READWRITE));
+
+    g_object_class_install_property(
+        object_class,
+        PROP_LATITUDE,
+        g_param_spec_float(
+            "latitude", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -G_MAXFLOAT, G_PARAM_READWRITE));
+
+    g_object_class_install_property(
+        object_class,
+        PROP_LONGITUDE,
+        g_param_spec_float(
+            "longitude", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -G_MAXFLOAT, G_PARAM_READWRITE));
+
+    g_object_class_install_property(
+        object_class,
+        PROP_LOCATION,
+        g_param_spec_string("location", NULL, NULL, NULL, G_PARAM_READWRITE));
+
+    g_object_class_install_property(
+        object_class,
+        PROP_COUNTRY,
+        g_param_spec_string("country", NULL, NULL, NULL, G_PARAM_READWRITE));
 
     g_object_class_install_property(
         object_class,
@@ -178,8 +250,14 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
 
     g_object_class_install_property(
         object_class,
-        PROP_SOUND_TYPE,
-        g_param_spec_string("sound-type", NULL, NULL, NULL, G_PARAM_READWRITE));
+        PROP_ELEVATION,
+        g_param_spec_float(
+            "elevation", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -G_MAXFLOAT, G_PARAM_READWRITE));
+
+    g_object_class_install_property(
+        object_class,
+        PROP_FILE,
+        g_param_spec_string("file", NULL, NULL, NULL, G_PARAM_READWRITE));
 
     g_object_class_install_property(
         object_class,
