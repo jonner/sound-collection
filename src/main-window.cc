@@ -18,6 +18,7 @@
  * along with SoundCollectio. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GRefPtr.h"
 #include "main-window.h"
 
 namespace SC {
@@ -34,6 +35,7 @@ struct MainWindow::Priv {
     Gtk::Box layout;
     Gtk::HeaderBar header;
     Gtk::Button import_button;
+    WTF::GRefPtr<GomRepository> repository;
 };
 
 MainWindow::MainWindow()
@@ -44,5 +46,10 @@ MainWindow::MainWindow()
     m_priv->layout.show_all();
     set_titlebar(m_priv->header);
     set_default_size(400, 400);
+}
+
+void MainWindow::set_repository(GomRepository* repository)
+{
+    m_priv->repository = repository;
 }
 }

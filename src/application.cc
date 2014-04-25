@@ -151,6 +151,7 @@ void Application::repository_migrate_finished(GomRepository* repository,
 
 void Application::show()
 {
+    m_priv->window.set_repository(m_priv->repository.get());
     m_priv->window.show();
 }
 }

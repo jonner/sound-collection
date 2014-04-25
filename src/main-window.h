@@ -21,6 +21,7 @@
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
 
+#include <gom/gom.h>
 #include <gtkmm.h>
 #include <tr1/memory>
 
@@ -29,6 +30,7 @@ namespace SC {
 class MainWindow : public Gtk::ApplicationWindow {
 public:
     MainWindow();
+    void set_repository(GomRepository* repository);
 
 private:
     struct Priv;
