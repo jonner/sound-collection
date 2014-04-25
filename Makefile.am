@@ -10,6 +10,10 @@ sound_collection_SOURCES = \
                            src/main.cc \
                            src/main-window.cc \
                            src/main-window.h \
+                           src/recording-list-box.cc \
+                           src/recording-list-box.h \
+                           src/recording-list-row.cc \
+                           src/recording-list-row.h \
                            src/recording-resource.c \
                            src/recording-resource.h \
                            src/species-resource.c \

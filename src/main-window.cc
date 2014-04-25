@@ -20,6 +20,7 @@
 
 #include "GRefPtr.h"
 #include "main-window.h"
+#include "recording-list-box.h"
 
 namespace SC {
 struct MainWindow::Priv {
@@ -34,6 +35,7 @@ struct MainWindow::Priv {
 
     Gtk::Box layout;
     Gtk::HeaderBar header;
+    RecordingListBox recording_list;
     Gtk::Button import_button;
     WTF::GRefPtr<GomRepository> repository;
 };
@@ -42,7 +44,8 @@ MainWindow::MainWindow()
     : m_priv(new Priv())
 {
     add(m_priv->layout);
-    m_priv->layout.pack_start(m_priv->import_button);
+    m_priv->layout.pack_start(m_priv->recording_list, true, true);
+    m_priv->layout.pack_start(m_priv->import_button, false, true);
     m_priv->layout.show_all();
     set_titlebar(m_priv->header);
     set_default_size(400, 400);
@@ -51,5 +54,6 @@ MainWindow::MainWindow()
 void MainWindow::set_repository(GomRepository* repository)
 {
     m_priv->repository = repository;
+    m_priv->recording_list.set_repository(repository);
 }
 }
