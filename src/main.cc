@@ -20,7 +20,8 @@
 
 #include "application.h"
 
-int main(int argc, char** argv) {
-  Glib::RefPtr<SC::Application> app = SC::Application::create();
-  return app->run(argc, argv);
+int main(int argc, char** argv)
+{
+    Glib::RefPtr<SC::Application> app = SC::Application::create();
+    return app->run(argc, argv);
 }

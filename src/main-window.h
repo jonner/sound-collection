@@ -27,13 +27,12 @@
 namespace SC {
 
 class MainWindow : public Gtk::ApplicationWindow {
- public:
-  MainWindow();
+public:
+    MainWindow();
 
- private:
-  struct Priv;
-  std::tr1::shared_ptr<Priv> m_priv;
+private:
+    struct Priv;
+    std::tr1::shared_ptr<Priv> m_priv;
 };
-
 }
-#endif  // _MAIN_WINDOW_H
+#endif // _MAIN_WINDOW_H

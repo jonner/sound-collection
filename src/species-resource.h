@@ -27,33 +27,33 @@ G_BEGIN_DECLS
 
 #define SC_TYPE_SPECIES_RESOURCE (sc_species_resource_get_type())
 #define SC_SPECIES_RESOURCE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST(   \
-      (obj), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResource))
+    (G_TYPE_CHECK_INSTANCE_CAST( \
+        (obj), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResource))
 #define SC_SPECIES_RESOURCE_CONST(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST(         \
-      (obj), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResource const))
+    (G_TYPE_CHECK_INSTANCE_CAST(       \
+        (obj), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResource const))
 #define SC_SPECIES_RESOURCE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST(              \
-      (klass), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResourceClass))
+    (G_TYPE_CHECK_CLASS_CAST(            \
+        (klass), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResourceClass))
 #define SC_IS_SPECIES_RESOURCE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj), SC_TYPE_SPECIES_RESOURCE))
+    (G_TYPE_CHECK_INSTANCE_TYPE((obj), SC_TYPE_SPECIES_RESOURCE))
 #define SC_IS_SPECIES_RESOURCE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass), SC_TYPE_SPECIES_RESOURCE))
+    (G_TYPE_CHECK_CLASS_TYPE((klass), SC_TYPE_SPECIES_RESOURCE))
 #define SC_SPECIES_RESOURCE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS(              \
-      (obj), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResourceClass))
+    (G_TYPE_INSTANCE_GET_CLASS(            \
+        (obj), SC_TYPE_SPECIES_RESOURCE, ScSpeciesResourceClass))
 typedef struct _ScSpeciesResource ScSpeciesResource;
 typedef struct _ScSpeciesResourceClass ScSpeciesResourceClass;
 typedef struct _ScSpeciesResourcePrivate ScSpeciesResourcePrivate;
 
 struct _ScSpeciesResource {
-  GomResource parent;
+    GomResource parent;
 
-  ScSpeciesResourcePrivate* priv;
+    ScSpeciesResourcePrivate* priv;
 };
 
 struct _ScSpeciesResourceClass {
-  GomResourceClass parent_class;
+    GomResourceClass parent_class;
 };
 
 GType sc_species_resource_get_type(void) G_GNUC_CONST;

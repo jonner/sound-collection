@@ -22,23 +22,27 @@
 
 namespace SC {
 struct MainWindow::Priv {
-  Priv() : layout(Gtk::ORIENTATION_VERTICAL), import_button("Import") {
-    header.set_title("Sound Collection");
-    header.set_show_close_button(true);
-    header.show();
-  }
+    Priv()
+        : layout(Gtk::ORIENTATION_VERTICAL)
+        , import_button("Import")
+    {
+        header.set_title("Sound Collection");
+        header.set_show_close_button(true);
+        header.show();
+    }
 
-  Gtk::Box layout;
-  Gtk::HeaderBar header;
-  Gtk::Button import_button;
+    Gtk::Box layout;
+    Gtk::HeaderBar header;
+    Gtk::Button import_button;
 };
 
-MainWindow::MainWindow() : m_priv(new Priv()) {
-  add(m_priv->layout);
-  m_priv->layout.pack_start(m_priv->import_button);
-  m_priv->layout.show_all();
-  set_titlebar(m_priv->header);
-  set_default_size(400, 400);
+MainWindow::MainWindow()
+    : m_priv(new Priv())
+{
+    add(m_priv->layout);
+    m_priv->layout.pack_start(m_priv->import_button);
+    m_priv->layout.show_all();
+    set_titlebar(m_priv->header);
+    set_default_size(400, 400);
 }
-
 }
