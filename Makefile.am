@@ -6,8 +6,8 @@ sound_collection_SOURCES = \
                            src/GRefPtr.cpp \
                            src/recording-resource.c \
                            src/recording-resource.h \
-                           src/sound-collection-app.cc \
-                           src/sound-collection-app.h \
+                           src/application.cc \
+                           src/application.h \
                            $(NULL)
 
 sound_collection_CFLAGS = \

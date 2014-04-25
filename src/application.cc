@@ -1,5 +1,5 @@
 /*
- * sound-collection-app.cc
+ * application.cc
  * This file is part of SoundCollection
  *
  * Copyright (C) 2014 - Jonathon Jongsma
@@ -22,13 +22,15 @@
 #include <gom/gom.h>
 #include <gtkmm.h>
 
+#include "application.h"
 #include "GRefPtr.h"
 #include "recording-resource.h"
-#include "sound-collection-app.h"
 
 #define REPOSITORY_VERSION 2
 
-struct SoundCollectionApp::Priv {
+namespace SC {
+
+struct Application::Priv {
   Priv() : status(0) {}
 
   int status;
@@ -38,16 +40,16 @@ struct SoundCollectionApp::Priv {
   Gtk::ApplicationWindow window;
 };
 
-Glib::RefPtr<SoundCollectionApp> SoundCollectionApp::create() {
-  return Glib::RefPtr<SoundCollectionApp>(new SoundCollectionApp());
+Glib::RefPtr<Application> Application::create() {
+  return Glib::RefPtr<Application>(new Application());
 }
 
-SoundCollectionApp::SoundCollectionApp()
+Application::Application()
     : Gtk::Application("org.quotidian.SoundCollection",
                        Gio::APPLICATION_HANDLES_COMMAND_LINE),
       m_priv(new Priv()) {}
 
-int SoundCollectionApp::on_command_line(
+int Application::on_command_line(
     const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line) {
   int argc = 0;
   char** argv = command_line->get_arguments(argc);
@@ -65,7 +67,7 @@ int SoundCollectionApp::on_command_line(
   m_priv->adapter = gom_adapter_new();
   gom_adapter_open_async(m_priv->adapter.get(),
                          uri.c_str(),
-                         SoundCollectionApp::adapter_open_ready_proxy,
+                         Application::adapter_open_ready_proxy,
                          this);
 
   g_strfreev(argv);
@@ -74,8 +76,7 @@ int SoundCollectionApp::on_command_line(
   return 0;
 }
 
-void SoundCollectionApp::adapter_open_ready(GomAdapter* adapter,
-                                            GAsyncResult* res) {
+void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res) {
   g_debug("%s", G_STRFUNC);
   GError* error = 0;
   if (!gom_adapter_open_finish(adapter, res, &error)) {
@@ -92,30 +93,29 @@ void SoundCollectionApp::adapter_open_ready(GomAdapter* adapter,
       m_priv->repository.get(),
       REPOSITORY_VERSION,
       types,
-      SoundCollectionApp::repository_migrate_finished_proxy,
+      Application::repository_migrate_finished_proxy,
       this);
 }
 
-void SoundCollectionApp::adapter_open_ready_proxy(GObject* source_object,
-                                                  GAsyncResult* res,
-                                                  gpointer user_data) {
-  SoundCollectionApp* self = static_cast<SoundCollectionApp*>(user_data);
+void Application::adapter_open_ready_proxy(GObject* source_object,
+                                           GAsyncResult* res,
+                                           gpointer user_data) {
+  Application* self = static_cast<Application*>(user_data);
   GomAdapter* adapter = reinterpret_cast<GomAdapter*>(source_object);
 
   self->adapter_open_ready(adapter, res);
 }
 
-void SoundCollectionApp::repository_migrate_finished_proxy(
-    GObject* source_object,
-    GAsyncResult* res,
-    gpointer user_data) {
-  SoundCollectionApp* self = static_cast<SoundCollectionApp*>(user_data);
+void Application::repository_migrate_finished_proxy(GObject* source_object,
+                                                    GAsyncResult* res,
+                                                    gpointer user_data) {
+  Application* self = static_cast<Application*>(user_data);
   GomRepository* repository = reinterpret_cast<GomRepository*>(source_object);
   self->repository_migrate_finished(repository, res);
 }
 
-void SoundCollectionApp::repository_migrate_finished(GomRepository* repository,
-                                                     GAsyncResult* res) {
+void Application::repository_migrate_finished(GomRepository* repository,
+                                              GAsyncResult* res) {
   g_debug("%s", G_STRFUNC);
   GError* error = 0;
   if (!gom_repository_automatic_migrate_finish(repository, res, &error)) {
@@ -129,4 +129,6 @@ void SoundCollectionApp::repository_migrate_finished(GomRepository* repository,
   show();
 }
 
-void SoundCollectionApp::show() { m_priv->window.show(); }
+void Application::show() { m_priv->window.show(); }
+
+}

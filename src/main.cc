@@ -18,11 +18,9 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gom/gom.h>
-
-#include "sound-collection-app.h"
+#include "application.h"
 
 int main(int argc, char** argv) {
-  Glib::RefPtr<SoundCollectionApp> app = SoundCollectionApp::create();
+  Glib::RefPtr<SC::Application> app = SC::Application::create();
   return app->run(argc, argv);
 }
