@@ -24,9 +24,11 @@
 #include "application.h"
 #include "GRefPtr.h"
 #include "main-window.h"
+#include "identification-resource.h"
 #include "recording-resource.h"
+#include "species-resource.h"
 
-#define REPOSITORY_VERSION 2
+#define REPOSITORY_VERSION 4
 
 namespace SC {
 
@@ -76,6 +78,10 @@ int Application::on_command_line(
   return 0;
 }
 
+static GType repository_types[] = { SC_TYPE_RECORDING_RESOURCE,
+                                    SC_TYPE_SPECIES_RESOURCE,
+                                    SC_TYPE_IDENTIFICATION_RESOURCE };
+
 void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res) {
   g_debug("%s", G_STRFUNC);
   GError* error = 0;
@@ -88,7 +94,10 @@ void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res) {
     g_debug("Opened adapter");
 
   m_priv->repository = gom_repository_new(m_priv->adapter.get());
-  GList* types = g_list_prepend(0, GINT_TO_POINTER(SC_TYPE_RECORDING_RESOURCE));
+  GList* types = 0;
+  for (int i = 0; i < G_N_ELEMENTS(repository_types); i++) {
+    types = g_list_prepend(types, GINT_TO_POINTER(repository_types[i]));
+  }
   gom_repository_automatic_migrate_async(
       m_priv->repository.get(),
       REPOSITORY_VERSION,

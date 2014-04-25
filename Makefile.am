@@ -5,11 +5,15 @@ sound_collection_SOURCES = \
                            src/application.h \
                            src/GRefPtr.cpp \
                            src/GRefPtr.h \
+                           src/identification-resource.c \
+                           src/identification-resource.h \
                            src/main.cc \
                            src/main-window.cc \
                            src/main-window.h \
                            src/recording-resource.c \
                            src/recording-resource.h \
+                           src/species-resource.c \
+                           src/species-resource.h \
                            $(NULL)
 
 sound_collection_CFLAGS = \
