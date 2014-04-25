@@ -1,0 +1,5 @@
+BasedOnStyle: WebKit
+BinPackParameters: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
