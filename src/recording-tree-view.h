@@ -1,5 +1,5 @@
 /*
- * recording-list-row.h
+ * recording-tree-view.h
  * This file is part of SoundCollection
  *
  * Copyright (C) 2014 - Jonathon Jongsma
@@ -18,18 +18,20 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _RECORDING_LIST_ROW_H
-#define _RECORDING_LIST_ROW_H
+#ifndef _RECORDING_TREE_VIEW_H
+#define _RECORDING_TREE_VIEW_H
 
 #include <gtkmm.h>
 #include <tr1/memory>
 
-#include "recording-resource.h"
+#include "recording-tree-model.h"
 
 namespace SC {
-class RecordingListRow : public Gtk::ListBoxRow {
+class RecordingTreeView : public Gtk::TreeView {
 public:
-    RecordingListRow(ScRecordingResource* recording);
+    RecordingTreeView();
+    
+    void set_model(const Glib::RefPtr<RecordingTreeModel>& model = Glib::RefPtr<RecordingTreeModel>());
 
 private:
     struct Priv;
@@ -37,4 +39,5 @@ private:
 };
 }
 
-#endif /* _RECORDING_LIST_ROW_H */
+#endif /* _RECORDING_TREE_VIEW_H */
+

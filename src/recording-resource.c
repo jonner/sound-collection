@@ -270,3 +270,32 @@ static void sc_recording_resource_init(ScRecordingResource* self)
     self->priv = SC_RECORDING_RESOURCE_GET_PRIVATE(self);
 }
 
+gint64 sc_recording_resource_get_id(ScRecordingResource* self)
+{
+    return self->priv->id;
+}
+
+const char* sc_recording_resource_get_file(ScRecordingResource* self)
+{
+    return self->priv->file;
+}
+
+const char* sc_recording_resource_get_location(ScRecordingResource* self)
+{
+    return self->priv->location;
+}
+const char* sc_recording_resource_get_country(ScRecordingResource* self)
+{
+    return self->priv->country;
+}
+
+float sc_recording_resource_get_latitude(ScRecordingResource* self)
+{
+    return self->priv->latitude;
+}
+
+float sc_recording_resource_get_longitude(ScRecordingResource* self)
+{
+    return self->priv->longitude;
+}
+

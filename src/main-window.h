@@ -33,6 +33,11 @@ public:
     void set_repository(GomRepository* repository);
 
 private:
+    static void got_results_proxy(GObject* source,
+                                  GAsyncResult* result,
+                                  gpointer user_data);
+    void got_results(GomRepository* repository, GAsyncResult* result);
+
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;
 };

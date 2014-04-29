@@ -59,6 +59,13 @@ struct _ScRecordingResourceClass {
 
 GType sc_recording_resource_get_type(void) G_GNUC_CONST;
 
+gint64 sc_recording_resource_get_id(ScRecordingResource* self);
+const char* sc_recording_resource_get_file(ScRecordingResource* self);
+const char* sc_recording_resource_get_location(ScRecordingResource* self);
+const char* sc_recording_resource_get_country(ScRecordingResource* self);
+float sc_recording_resource_get_latitude(ScRecordingResource* self);
+float sc_recording_resource_get_longitude(ScRecordingResource* self);
+
 G_END_DECLS
 
 #endif /* __SC_RECORDING_RESOURCE_H__ */

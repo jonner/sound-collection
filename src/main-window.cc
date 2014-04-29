@@ -20,22 +20,27 @@
 
 #include "GRefPtr.h"
 #include "main-window.h"
-#include "recording-list-box.h"
+#include "recording-tree-model.h"
+#include "recording-tree-view.h"
 
 namespace SC {
 struct MainWindow::Priv {
     Priv()
         : layout(Gtk::ORIENTATION_VERTICAL)
         , import_button("Import")
+        , tree_model(RecordingTreeModel::create())
     {
         header.set_title("Sound Collection");
         header.set_show_close_button(true);
         header.show();
+        scroller.add(tree_view);
     }
 
     Gtk::Box layout;
     Gtk::HeaderBar header;
-    RecordingListBox recording_list;
+    Gtk::ScrolledWindow scroller;
+    Glib::RefPtr<RecordingTreeModel> tree_model;
+    RecordingTreeView tree_view;
     Gtk::Button import_button;
     WTF::GRefPtr<GomRepository> repository;
 };
@@ -44,16 +49,46 @@ MainWindow::MainWindow()
     : m_priv(new Priv())
 {
     add(m_priv->layout);
-    m_priv->layout.pack_start(m_priv->recording_list, true, true);
+    m_priv->layout.pack_start(m_priv->scroller, true, true);
     m_priv->layout.pack_start(m_priv->import_button, false, true);
     m_priv->layout.show_all();
     set_titlebar(m_priv->header);
-    set_default_size(400, 400);
+    set_default_size(800, 600);
 }
 
 void MainWindow::set_repository(GomRepository* repository)
 {
     m_priv->repository = repository;
-    m_priv->recording_list.set_repository(repository);
+
+    gom_repository_find_async(m_priv->repository.get(),
+                              SC_TYPE_RECORDING_RESOURCE,
+                              0 /*m_priv->filter.get()*/,
+                              MainWindow::got_results_proxy,
+                              this);
+}
+
+void MainWindow::got_results_proxy(GObject* source,
+                                   GAsyncResult* result,
+                                   gpointer user_data)
+{
+    GomRepository* repository = reinterpret_cast<GomRepository*>(source);
+    MainWindow* self = reinterpret_cast<MainWindow*>(user_data);
+    self->got_results(repository, result);
+}
+
+void MainWindow::got_results(GomRepository* repository, GAsyncResult* result)
+{
+    g_debug("%s", G_STRFUNC);
+    GError* error = 0;
+    GomResourceGroup* results = gom_repository_find_finish(repository, result, &error);
+    if (error) {
+        g_warning("Unable to find resources: %s", error->message);
+        g_clear_error(&error);
+        return;
+    }
+
+    g_debug("total results: %i", gom_resource_group_get_count(results));
+    m_priv->tree_model->set_resource_group(results);
+    m_priv->tree_view.set_model(m_priv->tree_model);
 }
 }
