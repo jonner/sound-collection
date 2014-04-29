@@ -1,4 +1,4 @@
-bin_PROGRAMS = sound-collection
+bin_PROGRAMS = sound-collection test-audio-player
 
 sound_collection_SOURCES = \
                            src/application.cc \
@@ -29,3 +29,20 @@ sound_collection_CXXFLAGS = $(sound_collection_CFLAGS)
 sound_collection_LDADD = \
                          $(CORE_LIBS) \
                          $(NULL)
+
+
+test_audio_player_CXXFLAGS = \
+                             $(CORE_CFLAGS) \
+                             -I$(top_srcdir)/src \
+                             $(NULL)
+
+test_audio_player_LDADD = \
+                          $(CORE_LIBS) \
+                          $(NULL)
+
+test_audio_player_SOURCES = \
+                            src/simple-audio-player.cc \
+                            src/simple-audio-player.h \
+                            test/test-audio-player.cc \
+                            $(NULL)
+
