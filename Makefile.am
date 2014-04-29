@@ -1,4 +1,4 @@
-bin_PROGRAMS = sound-collection test-audio-player
+bin_PROGRAMS = sound-collection
 
 sound_collection_SOURCES = \
                            src/application.cc \
@@ -30,19 +30,38 @@ sound_collection_LDADD = \
                          $(CORE_LIBS) \
                          $(NULL)
 
+noinst_PROGRAMS = test-audio-player test-recording-window
 
-test_audio_player_CXXFLAGS = \
-                             $(CORE_CFLAGS) \
-                             -I$(top_srcdir)/src \
-                             $(NULL)
+test_CFLAGS = \
+              $(CORE_CFLAGS) \
+              -I$(top_srcdir)/src \
+              $(NULL)
 
-test_audio_player_LDADD = \
-                          $(CORE_LIBS) \
-                          $(NULL)
+test_LIBS = \
+             $(CORE_LIBS) \
+             $(NULL)
 
+test_audio_player_CXXFLAGS = $(test_CFLAGS)
+test_audio_player_LDADD = $(test_LIBS)
 test_audio_player_SOURCES = \
                             src/simple-audio-player.cc \
                             src/simple-audio-player.h \
                             test/test-audio-player.cc \
                             $(NULL)
 
+test_recording_window_CXXFLAGS = $(test_CFLAGS)
+test_recording_window_CFLAGS = $(test_CFLAGS)
+test_recording_window_LDADD = $(test_LIBS)
+test_recording_window_SOURCES = \
+                                 src/recording.cc \
+                                 src/recording.h \
+                                 src/recording-form.cc \
+                                 src/recording-form.h \
+                                 src/recording-resource.c \
+                                 src/recording-resource.h \
+                                 src/recording-window.cc \
+                                 src/recording-window.h \
+                                 src/simple-audio-player.cc \
+                                 src/simple-audio-player.h \
+                                 test/test-recording-window.cc \
+                                 $(NULL)
