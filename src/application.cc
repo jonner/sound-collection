@@ -20,6 +20,7 @@
 
 #include <gio/gio.h>
 #include <gom/gom.h>
+#include <gst/gst.h>
 
 #include "application.h"
 #include "GRefPtr.h"
@@ -62,6 +63,7 @@ int Application::on_command_line(
 {
     int argc = 0;
     char** argv = command_line->get_arguments(argc);
+    gst_init(NULL, NULL);
     g_debug("Got commandline: %i elements", argc);
 
     g_debug("argc = %i", argc);

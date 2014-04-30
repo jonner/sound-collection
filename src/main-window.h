@@ -33,6 +33,8 @@ public:
     void set_repository(GomRepository* repository);
 
 private:
+    void on_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+
     static void got_results_proxy(GObject* source,
                                   GAsyncResult* result,
                                   gpointer user_data);

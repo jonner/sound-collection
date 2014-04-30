@@ -18,8 +18,6 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glib.h>
-
 #include "recording-resource.h"
 
 #define SC_RECORDING_RESOURCE_GET_PRIVATE(object) \

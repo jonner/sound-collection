@@ -10,12 +10,20 @@ sound_collection_SOURCES = \
                            src/main.cc \
                            src/main-window.cc \
                            src/main-window.h \
+                           src/recording.cc \
+                           src/recording.h \
+                           src/recording-form.cc \
+                           src/recording-form.h \
                            src/recording-resource.c \
                            src/recording-resource.h \
                            src/recording-tree-model.cc \
                            src/recording-tree-model.h \
                            src/recording-tree-view.cc \
                            src/recording-tree-view.h \
+                           src/recording-window.cc \
+                           src/recording-window.h \
+                           src/simple-audio-player.cc \
+                           src/simple-audio-player.h \
                            src/species-resource.c \
                            src/species-resource.h \
                            $(NULL)

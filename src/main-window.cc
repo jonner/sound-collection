@@ -22,6 +22,7 @@
 #include "main-window.h"
 #include "recording-tree-model.h"
 #include "recording-tree-view.h"
+#include "recording-window.h"
 
 namespace SC {
 struct MainWindow::Priv {
@@ -90,5 +91,16 @@ void MainWindow::got_results(GomRepository* repository, GAsyncResult* result)
     g_debug("total results: %i", gom_resource_group_get_count(results));
     m_priv->tree_model->set_resource_group(results);
     m_priv->tree_view.set_model(m_priv->tree_model);
+    m_priv->tree_view.signal_row_activated().connect(
+        sigc::mem_fun(this, &MainWindow::on_row_activated));
+}
+
+void MainWindow::on_row_activated(const Gtk::TreeModel::Path& path,
+                                  Gtk::TreeViewColumn* column)
+{
+    Gtk::TreeModel::iterator iter = m_priv->tree_model->get_iter(path);
+    ScRecordingResource* resource = (*iter)[m_priv->tree_model->columns().resource];
+    std::tr1::shared_ptr<Recording> recording = Recording::create(resource);
+    RecordingWindow::display(recording);
 }
 }

@@ -29,8 +29,9 @@
 namespace SC {
 
 struct RecordingModelColumns : public Gtk::TreeModel::ColumnRecord {
+    Gtk::TreeModelColumn<ScRecordingResource*> resource;
     Gtk::TreeModelColumn<gint64> id;
-    Gtk::TreeModelColumn<float> length;
+    Gtk::TreeModelColumn<float> duration;
     Gtk::TreeModelColumn<int> quality;
     Gtk::TreeModelColumn<Glib::ustring> recordist;
     Gtk::TreeModelColumn<Glib::DateTime> date;

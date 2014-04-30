@@ -36,8 +36,9 @@ static T make_string(const char* cstr)
 }
 
 enum {
+    COLUMN_RESOURCE,
     COLUMN_ID,
-    COLUMN_LENGTH,
+    COLUMN_DURATION,
     COLUMN_QUALITY,
     COLUMN_RECORDIST,
     COLUMN_DATE,
@@ -52,8 +53,9 @@ enum {
 
 RecordingModelColumns::RecordingModelColumns()
 {
+    add(resource);
     add(id);
-    add(length);
+    add(duration);
     add(quality);
     add(recordist);
     add(date);
@@ -72,7 +74,6 @@ struct RecordingTreeModel::Priv {
     RecordingModelColumns columns;
     WTF::GRefPtr<GomResourceGroup> recordings;
     WTF::GRefPtr<ScRecordingResource> empty_recording;
-    int max_fetched;
     int stamp;
 
     Priv()
@@ -85,7 +86,6 @@ struct RecordingTreeModel::Priv {
                            "country",
                            loading,
                            NULL)))
-        , max_fetched(-1)
         , stamp(1)
     {
     }
@@ -175,23 +175,31 @@ void RecordingTreeModel::get_value_vfunc(const iterator& iter,
         return;
     guint index = iter_get_index(iter);
     ScRecordingResource* recording = get_recording(index);
-    g_debug("Getting value for index %i, column %i", index, column);
     switch (column) {
-    case COLUMN_ID: {
-        guint id = -1;
-        g_object_get(recording, "id", &id, NULL);
-        SETUP_VALUE(Gtk::TreeModelColumn<guint64>, value, id);
+    case COLUMN_RESOURCE:
+        SETUP_VALUE(Gtk::TreeModelColumn<ScRecordingResource*>,
+                    value,
+                    recording);
         break;
-    }
-    case COLUMN_LENGTH: {
-        float length = 0;
-        g_object_get(recording, "length", &length, NULL);
-        SETUP_VALUE(Gtk::TreeModelColumn<float>, value, length);
+    case COLUMN_ID:
+        SETUP_VALUE(Gtk::TreeModelColumn<guint64>,
+                    value,
+                    sc_recording_resource_get_id(recording));
         break;
-    }
+    case COLUMN_DURATION:
+        SETUP_VALUE(Gtk::TreeModelColumn<float>,
+                    value,
+                    sc_recording_resource_get_duration(recording));
+        break;
     case COLUMN_QUALITY:
+        SETUP_VALUE(Gtk::TreeModelColumn<int>,
+                    value,
+                    sc_recording_resource_get_quality(recording));
         break;
     case COLUMN_RECORDIST:
+        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>,
+                    value,
+                    make_string<Glib::ustring>(sc_recording_resource_get_recordist(recording)));
         break;
     case COLUMN_DATE: {
         GDateTime* gdate = 0;
@@ -201,24 +209,39 @@ void RecordingTreeModel::get_value_vfunc(const iterator& iter,
         break;
     } break;
     case COLUMN_LOCATION:
-        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>, value, make_string<Glib::ustring>(sc_recording_resource_get_location(recording)));
+        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>,
+                    value,
+                    make_string<Glib::ustring>(sc_recording_resource_get_location(recording)));
         break;
     case COLUMN_LATITUDE:
-        SETUP_VALUE(Gtk::TreeModelColumn<float>, value, sc_recording_resource_get_latitude(recording));
+        SETUP_VALUE(Gtk::TreeModelColumn<float>,
+                    value,
+                    sc_recording_resource_get_latitude(recording));
         break;
     case COLUMN_LONGITUDE:
-        SETUP_VALUE(Gtk::TreeModelColumn<float>, value, sc_recording_resource_get_longitude(recording));
+        SETUP_VALUE(Gtk::TreeModelColumn<float>,
+                    value,
+                    sc_recording_resource_get_longitude(recording));
         break;
     case COLUMN_COUNTRY:
-        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>, value, make_string<Glib::ustring>(sc_recording_resource_get_country(recording)));
+        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>,
+                    value,
+                    make_string<Glib::ustring>(sc_recording_resource_get_country(recording)));
         break;
     case COLUMN_ELEVATION:
+        SETUP_VALUE(Gtk::TreeModelColumn<float>,
+                    value,
+                    sc_recording_resource_get_elevation(recording));
         break;
-    case COLUMN_FILE: {
-        SETUP_VALUE(Gtk::TreeModelColumn<std::string>, value, make_string<std::string>(sc_recording_resource_get_file(recording)));
+    case COLUMN_FILE:
+        SETUP_VALUE(Gtk::TreeModelColumn<std::string>,
+                    value,
+                    make_string<std::string>(sc_recording_resource_get_file(recording)));
         break;
-    }
     case COLUMN_REMARKS:
+        SETUP_VALUE(Gtk::TreeModelColumn<std::string>,
+                    value,
+                    make_string<std::string>(sc_recording_resource_get_remarks(recording)));
         break;
     default:
         g_warning("Invalid column %i", column);
@@ -315,10 +338,9 @@ ScRecordingResource* RecordingTreeModel::get_recording(guint index) const
         gom_resource_group_get_index(m_priv->recordings.get(), index));
 
     if (recording) {
-        g_debug("%s: recording %u already fetched, returning...", G_STRFUNC, index);
         return recording;
     }
-    g_debug("%s: recording %u not fetched, fetching...", G_STRFUNC, index);
+    g_debug("recording %u not fetched, fetching...", index);
     fetch_recording(index);
     return m_priv->empty_recording.get();
 }
@@ -372,8 +394,7 @@ void RecordingTreeModel::recording_fetch_done(GomResourceGroup* recordings,
         return;
     }
 
-    m_priv->max_fetched = index + count;
-    g_debug("Set max_fetched to %u", m_priv->max_fetched);
+    g_debug("Recording %i fetched. signaling changed...", index);
     Gtk::TreeModel::Path path;
     path.push_back(index);
     row_changed(path, make_iterator(index));
@@ -381,10 +402,6 @@ void RecordingTreeModel::recording_fetch_done(GomResourceGroup* recordings,
 
 void RecordingTreeModel::fetch_recording(guint index) const
 {
-    // fetch the next /page that includes this index
-    guint end = std::min(((index % PAGE_SIZE) + 1) * PAGE_SIZE,
-                         gom_resource_group_get_count(m_priv->recordings.get()));
-    guint start = std::max(0, m_priv->max_fetched);
     gom_resource_group_fetch_async(GOM_RESOURCE_GROUP(m_priv->recordings.get()),
                                    index,
                                    1,

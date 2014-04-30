@@ -31,6 +31,11 @@ struct RecordingForm::Priv {
     Gtk::Entry file_entry;
     Gtk::Label preview_label;
     SimpleAudioPlayer preview_player;
+    Gtk::Label duration_label;
+    Gtk::Label duration_value_label;
+    Gtk::Button duration_update_button;
+    GstElement* playbin;
+    GstBus* bus;
 
     Priv(const std::tr1::shared_ptr<Recording>& rec)
         : recording(rec)
@@ -38,6 +43,9 @@ struct RecordingForm::Priv {
         , file_label("File")
         , preview_label("Preview")
         , preview_player(rec->file())
+        , duration_label("Duration")
+        , playbin(0)
+        , bus(0)
     {
         id_label.show();
         id_value_label.set_text(Glib::ustring::format(recording->id()));
@@ -47,6 +55,63 @@ struct RecordingForm::Priv {
         file_entry.show();
         preview_label.show();
         preview_player.show();
+        duration_label.show();
+        duration_value_label.set_text(Glib::ustring::format(recording->duration()));
+        duration_value_label.show();
+        duration_update_button.show();
+        duration_update_button.set_image_from_icon_name("reload");
+        duration_update_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_update_duration_clicked));
+    }
+
+    static gboolean bus_watch(GstBus* bus, GstMessage* message, gpointer user_data)
+    {
+        Priv* priv = reinterpret_cast<Priv*>(user_data);
+        if (message->type == GST_MESSAGE_STATE_CHANGED
+            || message->type == GST_MESSAGE_DURATION_CHANGED) {
+            if (priv->try_update_duration()) {
+                // remove source
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool try_update_duration()
+    {
+        gint64 duration = GST_CLOCK_TIME_NONE;
+        GstState state = GST_STATE_NULL;
+        if (gst_element_get_state(playbin, &state, NULL, GST_CLOCK_TIME_NONE) == GST_STATE_CHANGE_SUCCESS
+            && state == GST_STATE_PAUSED) {
+            if (gst_element_query_duration(playbin, GST_FORMAT_TIME, &duration)) {
+                float seconds = static_cast<float>(GST_TIME_AS_MSECONDS(duration)) / 1000.0;
+                duration_value_label.set_text(Glib::ustring::format(seconds));
+                g_object_set(recording->resource(),
+                             "duration",
+                             seconds,
+                             NULL);
+                gom_resource_save_sync(GOM_RESOURCE(recording->resource()), 0);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void on_update_duration_clicked()
+    {
+        if (!playbin) {
+            playbin = gst_element_factory_make("playbin", "playbin");
+            g_object_set(playbin, "uri", recording->file()->get_uri().c_str(), NULL);
+            gst_element_set_state(playbin, GST_STATE_PAUSED);
+            bus = gst_element_get_bus(playbin);
+        }
+        if (!try_update_duration())
+            gst_bus_add_watch(bus, &Priv::bus_watch, this);
+    }
+
+    ~Priv()
+    {
+        gst_object_unref(playbin);
+        gst_object_unref(bus);
     }
 };
 
@@ -63,5 +128,8 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach(m_priv->file_entry, 1, 1, 1, 1);
     attach(m_priv->preview_label, 0, 2, 1, 1);
     attach(m_priv->preview_player, 1, 2, 1, 1);
+    attach(m_priv->duration_label, 0, 3, 1, 1);
+    attach(m_priv->duration_value_label, 1, 3, 1, 1);
+    attach(m_priv->duration_update_button, 2, 3, 1, 1);
 }
 }
