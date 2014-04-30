@@ -23,6 +23,13 @@
 
 namespace SC {
 
+static Glib::ustring make_string(const char* cstr)
+{
+    if (cstr)
+        return Glib::ustring(cstr);
+    return "";
+}
+
 struct Recording::Priv {
     WTF::GRefPtr<ScRecordingResource> resource;
 
@@ -64,12 +71,12 @@ std::tr1::shared_ptr<Recording> Recording::create(ScRecordingResource* resource)
 
 Glib::ustring Recording::location() const
 {
-    return sc_recording_resource_get_location(resource());
+    return make_string(sc_recording_resource_get_location(resource()));
 }
 
 Glib::ustring Recording::country() const
 {
-    return sc_recording_resource_get_country(resource());
+    return make_string(sc_recording_resource_get_country(resource()));
 }
 
 float Recording::latitude() const
@@ -94,7 +101,7 @@ Glib::DateTime Recording::date() const
 
 Glib::ustring Recording::recordist() const
 {
-    return sc_recording_resource_get_recordist(resource());
+    return make_string(sc_recording_resource_get_recordist(resource()));
 }
 
 float Recording::elevation() const
@@ -104,7 +111,7 @@ float Recording::elevation() const
 
 Glib::ustring Recording::remarks() const
 {
-    return sc_recording_resource_get_remarks(resource());
+    return make_string(sc_recording_resource_get_remarks(resource()));
 }
 
 float Recording::duration() const
