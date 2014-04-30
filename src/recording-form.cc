@@ -42,51 +42,79 @@ struct RecordingForm::Priv {
     Gtk::Entry latitude_entry;
     Gtk::Label longitude_label;
     Gtk::Entry longitude_entry;
+    Gtk::Label remarks_label;
+    Gtk::ScrolledWindow remarks_scroll;
+    Gtk::TextView remarks_entry;
     GstElement* playbin;
     GstBus* bus;
 
     Priv(const std::tr1::shared_ptr<Recording>& rec)
         : recording(rec)
-        , id_label("ID")
-        , file_label("File")
-        , preview_label("Preview")
+        , id_label("ID", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , id_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
+        , file_label("File", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , preview_label("Preview", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , preview_player(rec->file())
-        , duration_label("Duration")
-        , location_label("Location")
-        , country_label("Country")
-        , latitude_label("Latitude")
-        , longitude_label("Longitude")
+        , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , duration_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
+        , location_label("Location", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , country_label("Country", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , latitude_label("Latitude", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , longitude_label("Longitude", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , remarks_label("Remarks", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , playbin(0)
         , bus(0)
     {
+        Pango::Attribute bold = Pango::Attribute::create_attr_weight(Pango::WEIGHT_BOLD);
+        Pango::AttrList attrs;
+        attrs.insert(bold);
         id_label.show();
+        id_label.set_attributes(attrs);
         id_value_label.set_text(Glib::ustring::format(recording->id()));
         id_value_label.show();
+        id_value_label.set_hexpand(true);
         file_label.show();
+        file_label.set_attributes(attrs);
         file_entry.set_text(recording->file()->get_path());
         file_entry.show();
+        file_entry.set_hexpand(true);
         preview_label.show();
+        preview_label.set_attributes(attrs);
         preview_player.show();
+        preview_player.set_hexpand(false);
         duration_label.show();
+        duration_label.set_attributes(attrs);
         duration_value_label.set_text(Glib::ustring::format(recording->duration()));
         duration_value_label.show();
+        duration_value_label.set_hexpand(false);
         duration_update_button.show();
         duration_update_button.set_image_from_icon_name("reload");
         duration_update_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_update_duration_clicked));
+        duration_update_button.set_hexpand(false);
         location_label.show();
+        location_label.set_attributes(attrs);
         location_entry.show();
         location_entry.set_text(recording->location());
         country_label.show();
+        country_label.set_attributes(attrs);
         country_entry.show();
         country_entry.set_text(recording->country());
         latitude_label.show();
+        latitude_label.set_attributes(attrs);
         latitude_entry.show();
         latitude_entry.set_input_purpose(Gtk::INPUT_PURPOSE_NUMBER);
         latitude_entry.set_text(Glib::ustring::format(recording->latitude()));
         longitude_label.show();
+        longitude_label.set_attributes(attrs);
         longitude_entry.show();
         longitude_entry.set_input_purpose(Gtk::INPUT_PURPOSE_NUMBER);
         longitude_entry.set_text(Glib::ustring::format(recording->longitude()));
+        remarks_label.show();
+        remarks_label.set_attributes(attrs);
+        remarks_scroll.set_hexpand(true);
+        remarks_scroll.add(remarks_entry);
+        remarks_entry.get_buffer()->set_text(recording->remarks());
+        remarks_entry.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
     }
 
     static gboolean bus_watch(GstBus* bus, GstMessage* message, gpointer user_data)
@@ -153,19 +181,21 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach(m_priv->id_label, 0, 0, 1, 1);
     attach(m_priv->id_value_label, 1, 0, 1, 1);
     attach(m_priv->file_label, 0, 1, 1, 1);
-    attach(m_priv->file_entry, 1, 1, 1, 1);
+    attach(m_priv->file_entry, 1, 1, 3, 1);
     attach(m_priv->preview_label, 0, 2, 1, 1);
     attach(m_priv->preview_player, 1, 2, 1, 1);
     attach(m_priv->duration_label, 0, 3, 1, 1);
     attach(m_priv->duration_value_label, 1, 3, 1, 1);
     attach(m_priv->duration_update_button, 2, 3, 1, 1);
     attach(m_priv->location_label, 0, 4, 1, 1);
-    attach(m_priv->location_entry, 1, 4, 1, 1);
+    attach(m_priv->location_entry, 1, 4, 3, 1);
     attach(m_priv->country_label, 0, 5, 1, 1);
-    attach(m_priv->country_entry, 1, 5, 1, 1);
+    attach(m_priv->country_entry, 1, 5, 3, 1);
     attach(m_priv->latitude_label, 0, 6, 1, 1);
-    attach(m_priv->latitude_entry, 1, 6, 1, 1);
+    attach(m_priv->latitude_entry, 1, 6, 3, 1);
     attach(m_priv->longitude_label, 0, 7, 1, 1);
-    attach(m_priv->longitude_entry, 1, 7, 1, 1);
+    attach(m_priv->longitude_entry, 1, 7, 3, 1);
+    attach(m_priv->remarks_label, 0, 8, 1, 1);
+    attach(m_priv->remarks_scroll, 0, 9, 4, 4);
 }
 }
