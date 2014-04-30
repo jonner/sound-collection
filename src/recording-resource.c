@@ -28,7 +28,7 @@
 
 struct _ScRecordingResourcePrivate {
     gint64 id;
-    gfloat length;
+    gfloat duration;
     gint quality;
     char* recordist;
     GDateTime* date;
@@ -44,7 +44,7 @@ struct _ScRecordingResourcePrivate {
 enum {
     PROP_0,
     PROP_ID,
-    PROP_LENGTH,
+    PROP_DURATION,
     PROP_QUALITY,
     PROP_RECORDIST,
     PROP_DATE,
@@ -83,8 +83,8 @@ static void sc_recording_resource_set_property(GObject* obj,
     case PROP_ID:
         self->priv->id = g_value_get_int64(value);
         break;
-    case PROP_LENGTH:
-        self->priv->length = g_value_get_float(value);
+    case PROP_DURATION:
+        self->priv->duration = g_value_get_float(value);
         break;
     case PROP_QUALITY:
         self->priv->quality = g_value_get_int(value);
@@ -137,8 +137,8 @@ static void sc_recording_resource_get_property(GObject* obj,
     case PROP_ID:
         g_value_set_int64(value, self->priv->id);
         break;
-    case PROP_LENGTH:
-        g_value_set_float(value, self->priv->length);
+    case PROP_DURATION:
+        g_value_set_float(value, self->priv->duration);
         break;
     case PROP_QUALITY:
         g_value_set_int(value, self->priv->quality);
@@ -205,9 +205,9 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
 
     g_object_class_install_property(
         object_class,
-        PROP_LENGTH,
+        PROP_DURATION,
         g_param_spec_float(
-            "length", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -1, G_PARAM_READWRITE));
+            "duration", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -1, G_PARAM_READWRITE));
 
     g_object_class_install_property(
         object_class,

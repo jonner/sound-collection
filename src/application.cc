@@ -28,7 +28,7 @@
 #include "recording-resource.h"
 #include "species-resource.h"
 
-#define REPOSITORY_VERSION 5
+#define REPOSITORY_VERSION 1
 
 namespace SC {
 
