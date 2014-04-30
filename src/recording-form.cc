@@ -136,8 +136,10 @@ struct RecordingForm::Priv {
 
     ~Priv()
     {
-        gst_object_unref(playbin);
-        gst_object_unref(bus);
+        if (playbin)
+            gst_object_unref(playbin);
+        if (bus)
+            gst_object_unref(bus);
     }
 };
 
