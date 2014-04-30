@@ -59,12 +59,18 @@ struct _ScRecordingResourceClass {
 
 GType sc_recording_resource_get_type(void) G_GNUC_CONST;
 
-gint64 sc_recording_resource_get_id(ScRecordingResource* self);
-const char* sc_recording_resource_get_file(ScRecordingResource* self);
-const char* sc_recording_resource_get_location(ScRecordingResource* self);
-const char* sc_recording_resource_get_country(ScRecordingResource* self);
-float sc_recording_resource_get_latitude(ScRecordingResource* self);
-float sc_recording_resource_get_longitude(ScRecordingResource* self);
+gint64 sc_recording_resource_get_id(const ScRecordingResource* self);
+const char* sc_recording_resource_get_file(const ScRecordingResource* self);
+const char* sc_recording_resource_get_location(const ScRecordingResource* self);
+const char* sc_recording_resource_get_country(const ScRecordingResource* self);
+gfloat sc_recording_resource_get_latitude(const ScRecordingResource* self);
+gfloat sc_recording_resource_get_longitude(const ScRecordingResource* self);
+gint sc_recording_resource_get_quality(const ScRecordingResource* self);
+GDateTime* sc_recording_resource_get_date(const ScRecordingResource* self);
+const char* sc_recording_resource_get_recordist(const ScRecordingResource* self);
+gfloat sc_recording_resource_get_elevation(const ScRecordingResource* self);
+const char* sc_recording_resource_get_remarks(const ScRecordingResource* self);
+gfloat sc_recording_resource_get_duration(const ScRecordingResource* self);
 
 G_END_DECLS
 

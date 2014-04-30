@@ -32,6 +32,17 @@ public:
 
     gint64 id() const;
     Glib::RefPtr<Gio::File> file() const;
+    Glib::ustring location() const;
+    Glib::ustring country() const;
+    float latitude() const;
+    float longitude() const;
+    int quality() const;
+    Glib::DateTime date() const;
+    Glib::ustring recordist() const;
+    float elevation() const;
+    Glib::ustring remarks() const;
+    float duration() const;
+
     const ScRecordingResource* resource() const;
     ScRecordingResource* resource();
 

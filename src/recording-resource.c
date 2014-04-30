@@ -270,32 +270,63 @@ static void sc_recording_resource_init(ScRecordingResource* self)
     self->priv = SC_RECORDING_RESOURCE_GET_PRIVATE(self);
 }
 
-gint64 sc_recording_resource_get_id(ScRecordingResource* self)
+gint64 sc_recording_resource_get_id(const ScRecordingResource* self)
 {
     return self->priv->id;
 }
 
-const char* sc_recording_resource_get_file(ScRecordingResource* self)
+const char* sc_recording_resource_get_file(const ScRecordingResource* self)
 {
     return self->priv->file;
 }
 
-const char* sc_recording_resource_get_location(ScRecordingResource* self)
+const char* sc_recording_resource_get_location(const ScRecordingResource* self)
 {
     return self->priv->location;
 }
-const char* sc_recording_resource_get_country(ScRecordingResource* self)
+const char* sc_recording_resource_get_country(const ScRecordingResource* self)
 {
     return self->priv->country;
 }
 
-float sc_recording_resource_get_latitude(ScRecordingResource* self)
+gfloat sc_recording_resource_get_latitude(const ScRecordingResource* self)
 {
     return self->priv->latitude;
 }
 
-float sc_recording_resource_get_longitude(ScRecordingResource* self)
+gfloat sc_recording_resource_get_longitude(const ScRecordingResource* self)
 {
     return self->priv->longitude;
 }
+
+gint sc_recording_resource_get_quality(const ScRecordingResource* self)
+{
+    return self->priv->quality;
+}
+
+GDateTime* sc_recording_resource_get_date(const ScRecordingResource* self)
+{
+    return self->priv->date;
+}
+
+const char* sc_recording_resource_get_recordist(const ScRecordingResource* self)
+{
+    return self->priv->recordist;
+}
+
+gfloat sc_recording_resource_get_elevation(const ScRecordingResource* self)
+{
+    return self->priv->elevation;
+}
+
+const char* sc_recording_resource_get_remarks(const ScRecordingResource* self)
+{
+    return self->priv->remarks;
+}
+
+gfloat sc_recording_resource_get_duration(const ScRecordingResource* self)
+{
+    return self->priv->duration;
+}
+
 
