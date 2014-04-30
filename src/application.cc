@@ -156,4 +156,9 @@ void Application::show()
     m_priv->window.set_repository(m_priv->repository.get());
     m_priv->window.show();
 }
+
+Glib::RefPtr<const Gio::File> Application::database() const
+{
+    return m_priv->db;
+}
 }

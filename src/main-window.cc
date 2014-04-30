@@ -18,6 +18,7 @@
  * along with SoundCollectio. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "application.h"
 #include "GRefPtr.h"
 #include "main-window.h"
 #include "recording-tree-model.h"
@@ -31,10 +32,16 @@ struct MainWindow::Priv {
         , import_button("Import")
         , tree_model(RecordingTreeModel::create())
     {
-        header.set_title("Sound Collection");
         header.set_show_close_button(true);
         header.show();
         scroller.add(tree_view);
+    }
+
+    void application_changed(MainWindow* window)
+    {
+        Glib::RefPtr<Application> app = window->application();
+        if (app)
+            header.set_subtitle(app->database()->get_path());
     }
 
     Gtk::Box layout;
@@ -53,6 +60,10 @@ MainWindow::MainWindow()
     m_priv->layout.pack_start(m_priv->scroller, true, true);
     m_priv->layout.pack_start(m_priv->import_button, false, true);
     m_priv->layout.show_all();
+    m_priv->header.set_title("Sound Collection");
+    property_application().signal_changed().connect(
+        sigc::bind(sigc::mem_fun(m_priv.get(), &Priv::application_changed), this));
+
     set_titlebar(m_priv->header);
     set_default_size(800, 600);
 }
@@ -102,5 +113,13 @@ void MainWindow::on_row_activated(const Gtk::TreeModel::Path& path,
     ScRecordingResource* resource = (*iter)[m_priv->tree_model->columns().resource];
     std::tr1::shared_ptr<Recording> recording = Recording::create(resource);
     RecordingWindow::display(recording);
+}
+
+Glib::RefPtr<Application> MainWindow::application()
+{
+    Gtk::Application* app = property_application().get_value().operator->();
+    Application* scapp = dynamic_cast<Application*>(app);
+    g_debug("property_application: %p, cast to myapp: %p", app, scapp);
+    return Glib::RefPtr<Application>::cast_dynamic(property_application().get_value());
 }
 }

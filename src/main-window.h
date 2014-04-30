@@ -27,6 +27,8 @@
 
 namespace SC {
 
+class Application;
+
 class MainWindow : public Gtk::ApplicationWindow {
 public:
     MainWindow();
@@ -39,6 +41,7 @@ private:
                                   GAsyncResult* result,
                                   gpointer user_data);
     void got_results(GomRepository* repository, GAsyncResult* result);
+    Glib::RefPtr<Application> application();
 
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;

@@ -31,6 +31,7 @@ namespace SC {
 class Application : public Gtk::Application {
 public:
     static Glib::RefPtr<SC::Application> create();
+    Glib::RefPtr<const Gio::File> database() const;
 
 private:
     Application();
