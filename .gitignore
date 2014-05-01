@@ -26,3 +26,6 @@ install-sh
 /missing
 /sound-collection
 /stamp-h1
+/test-audio-player
+/test-location-window
+/test-recording-window

@@ -26,6 +26,10 @@ libcore_a_CXXFLAGS = $(libcore_a_CFLAGS)
 libui_a_SOURCES = \
                   src/application.cc \
                   src/application.h \
+                  src/location-form.cc \
+                  src/location-form.h \
+                  src/location-window.cc \
+                  src/location-window.h \
                   src/main-window.cc \
                   src/main-window.h \
                   src/recording-form.cc \
@@ -64,7 +68,7 @@ sound_collection_LDADD = \
                          $(CORE_LIBS) \
                          $(NULL)
 
-noinst_PROGRAMS = test-audio-player test-recording-window
+noinst_PROGRAMS = test-audio-player test-recording-window test-location-window
 
 test_CFLAGS = \
               $(CORE_CFLAGS) \
@@ -87,4 +91,10 @@ test_recording_window_CXXFLAGS = $(test_CFLAGS)
 test_recording_window_LDADD = $(test_LIBS)
 test_recording_window_SOURCES = \
                                 test/test-recording-window.cc \
+                                $(NULL)
+
+test_location_window_CXXFLAGS = $(test_CFLAGS)
+test_location_window_LDADD = $(test_LIBS)
+test_location_window_SOURCES = \
+                                test/test-location-window.cc \
                                 $(NULL)

@@ -79,4 +79,9 @@ float Location::longitude() const
 {
     return sc_location_resource_get_longitude(resource());
 }
+
+std::tr1::shared_ptr<Location> Location::create(ScLocationResource* resource)
+{
+    return std::tr1::shared_ptr<Location>(new Location(resource));
+}
 }
