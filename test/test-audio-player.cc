@@ -22,6 +22,11 @@
 #include <gst/gst.h>
 #include "simple-audio-player.h"
 
+static void free_window(Gtk::Window* win)
+{
+    delete win;
+}
+
 typedef std::vector<Glib::RefPtr<Gio::File> > FileVector;
 static void open(const FileVector& files,
                  const Glib::ustring& hint,
@@ -49,6 +54,7 @@ static void open(const FileVector& files,
     win->add(*player);
     app->add_window(*win);
     win->show();
+    win->signal_hide().connect(sigc::bind(sigc::ptr_fun(free_window), win));
 }
 
 int main(int argc, char* argv[])
