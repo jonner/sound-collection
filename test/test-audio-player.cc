@@ -22,18 +22,41 @@
 #include <gst/gst.h>
 #include "simple-audio-player.h"
 
+typedef std::vector<Glib::RefPtr<Gio::File> > FileVector;
+static void open(const FileVector& files,
+                 const Glib::ustring& hint,
+                 const Glib::RefPtr<Gtk::Application>& app)
+{
+    g_debug("%s: %i files", G_STRFUNC, files.size());
+    if (files.empty())
+        g_error("No file specified");
+
+    for (FileVector::const_iterator it = files.begin();
+         it != files.end();
+         ++it) {
+        g_debug("file: %s", (*it)->get_uri().c_str());
+    }
+
+    Glib::RefPtr<Gio::File> f = files[0];
+    if (!f->query_exists()) {
+        g_error("File %s does not exist", f->get_path().c_str());
+        app->quit();
+    }
+
+    Gtk::Window* win = new Gtk::Window();
+    SC::SimpleAudioPlayer* player = Gtk::manage(new SC::SimpleAudioPlayer(f));
+    player->show();
+    win->add(*player);
+    app->add_window(*win);
+    win->show();
+}
+
 int main(int argc, char* argv[])
 {
-    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("org.quotidian.TestAudioPlayer");
-//    gst_init(&argc, &argv);
-gst_init(NULL, NULL);
-
-    Gtk::Window win;
-    SC::SimpleAudioPlayer player(Gio::File::create_for_path("/home/jjongsma/Recordings/Originals/JMJ-20140418-113226-140418_40-USA-MN-GreyCloudDunes-VESP-3-song.flac"));
-    player.show();
-    win.add(player);
-    win.show();
-    
-    app->run(win, argc, argv);
+    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("org.quotidian.TestAudioPlayer",
+                                                                  Gio::APPLICATION_HANDLES_OPEN);
+    gst_init(NULL, NULL);
+    app->signal_open().connect(sigc::bind(sigc::ptr_fun(open), app));
+    app->run(argc, argv);
     return 0;
 }
