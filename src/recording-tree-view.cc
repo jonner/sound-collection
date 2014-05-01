@@ -26,10 +26,13 @@ struct RecordingTreeView::Priv {
     Glib::RefPtr<RecordingTreeModel> model;
     Gtk::TreeViewColumn id;
     Gtk::TreeViewColumn file;
+    Gtk::CellRendererText file_renderer;
+    Gtk::TreeViewColumn duration;
 
     Priv()
         : id("ID")
         , file("File")
+        , duration("Duration")
     {
         id.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
         id.set_fixed_width(40);
@@ -37,6 +40,10 @@ struct RecordingTreeView::Priv {
         file.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
         file.set_fixed_width(400);
         file.set_resizable(true);
+        file_renderer.property_ellipsize() = Pango::ELLIPSIZE_START;
+        duration.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
+        duration.set_fixed_width(100);
+        duration.set_resizable(true);
     }
 };
 
@@ -46,6 +53,7 @@ RecordingTreeView::RecordingTreeView()
     set_fixed_height_mode(true);
     append_column(m_priv->id);
     append_column(m_priv->file);
+    append_column(m_priv->duration);
 }
 
 void RecordingTreeView::set_model(const Glib::RefPtr<RecordingTreeModel>& model)
@@ -57,6 +65,8 @@ void RecordingTreeView::set_model(const Glib::RefPtr<RecordingTreeModel>& model)
         return;
 
     m_priv->id.pack_start(model->columns().id);
-    m_priv->file.pack_start(model->columns().file);
+    m_priv->file.pack_start(m_priv->file_renderer);
+    m_priv->file.set_renderer(m_priv->file_renderer, model->columns().file);
+    m_priv->duration.pack_start(model->columns().duration);
 }
 }
