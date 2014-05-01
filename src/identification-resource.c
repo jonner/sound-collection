@@ -128,7 +128,7 @@ static void sc_identification_resource_class_init(
                              sizeof(ScIdentificationResourcePrivate));
 
     GomResourceClass* resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "identification");
+    gom_resource_class_set_table(resource_class, "identifications");
     gom_resource_class_set_primary_key(resource_class, "id");
 
     g_object_class_install_property(
