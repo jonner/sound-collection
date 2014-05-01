@@ -35,10 +35,6 @@ struct RecordingModelColumns : public Gtk::TreeModel::ColumnRecord {
     Gtk::TreeModelColumn<int> quality;
     Gtk::TreeModelColumn<Glib::ustring> recordist;
     Gtk::TreeModelColumn<Glib::DateTime> date;
-    Gtk::TreeModelColumn<Glib::ustring> location;
-    Gtk::TreeModelColumn<float> latitude;
-    Gtk::TreeModelColumn<float> longitude;
-    Gtk::TreeModelColumn<Glib::ustring> country;
     Gtk::TreeModelColumn<float> elevation;
     Gtk::TreeModelColumn<std::string> file;
     Gtk::TreeModelColumn<Glib::ustring> remarks;

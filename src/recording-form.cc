@@ -34,14 +34,6 @@ struct RecordingForm::Priv {
     Gtk::Label duration_label;
     Gtk::Label duration_value_label;
     Gtk::Button duration_update_button;
-    Gtk::Label location_label;
-    Gtk::Entry location_entry;
-    Gtk::Label country_label;
-    Gtk::Entry country_entry;
-    Gtk::Label latitude_label;
-    Gtk::Entry latitude_entry;
-    Gtk::Label longitude_label;
-    Gtk::Entry longitude_entry;
     Gtk::Label remarks_label;
     Gtk::ScrolledWindow remarks_scroll;
     Gtk::TextView remarks_entry;
@@ -57,10 +49,6 @@ struct RecordingForm::Priv {
         , preview_player(rec->file())
         , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , duration_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
-        , location_label("Location", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
-        , country_label("Country", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
-        , latitude_label("Latitude", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
-        , longitude_label("Longitude", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , remarks_label("Remarks", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , playbin(0)
         , bus(0)
@@ -91,24 +79,6 @@ struct RecordingForm::Priv {
         duration_update_button.set_image_from_icon_name("reload");
         duration_update_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_update_duration_clicked));
         duration_update_button.set_hexpand(false);
-        location_label.show();
-        location_label.set_attributes(attrs);
-        location_entry.show();
-        location_entry.set_text(recording->location());
-        country_label.show();
-        country_label.set_attributes(attrs);
-        country_entry.show();
-        country_entry.set_text(recording->country());
-        latitude_label.show();
-        latitude_label.set_attributes(attrs);
-        latitude_entry.show();
-        latitude_entry.set_input_purpose(Gtk::INPUT_PURPOSE_NUMBER);
-        latitude_entry.set_text(Glib::ustring::format(recording->latitude()));
-        longitude_label.show();
-        longitude_label.set_attributes(attrs);
-        longitude_entry.show();
-        longitude_entry.set_input_purpose(Gtk::INPUT_PURPOSE_NUMBER);
-        longitude_entry.set_text(Glib::ustring::format(recording->longitude()));
         remarks_label.show();
         remarks_label.set_attributes(attrs);
         remarks_scroll.set_hexpand(true);
@@ -187,15 +157,7 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach(m_priv->duration_label, 0, 3, 1, 1);
     attach(m_priv->duration_value_label, 1, 3, 1, 1);
     attach(m_priv->duration_update_button, 2, 3, 1, 1);
-    attach(m_priv->location_label, 0, 4, 1, 1);
-    attach(m_priv->location_entry, 1, 4, 3, 1);
-    attach(m_priv->country_label, 0, 5, 1, 1);
-    attach(m_priv->country_entry, 1, 5, 3, 1);
-    attach(m_priv->latitude_label, 0, 6, 1, 1);
-    attach(m_priv->latitude_entry, 1, 6, 3, 1);
-    attach(m_priv->longitude_label, 0, 7, 1, 1);
-    attach(m_priv->longitude_entry, 1, 7, 3, 1);
-    attach(m_priv->remarks_label, 0, 8, 1, 1);
-    attach(m_priv->remarks_scroll, 0, 9, 4, 4);
+    attach(m_priv->remarks_label, 0, 4, 1, 1);
+    attach(m_priv->remarks_scroll, 0, 5, 4, 4);
 }
 }

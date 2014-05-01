@@ -69,24 +69,9 @@ std::tr1::shared_ptr<Recording> Recording::create(ScRecordingResource* resource)
     return std::tr1::shared_ptr<Recording>(new Recording(resource));
 }
 
-Glib::ustring Recording::location() const
+gint64 Recording::location_id() const
 {
-    return make_string(sc_recording_resource_get_location(resource()));
-}
-
-Glib::ustring Recording::country() const
-{
-    return make_string(sc_recording_resource_get_country(resource()));
-}
-
-float Recording::latitude() const
-{
-    return sc_recording_resource_get_latitude(resource());
-}
-
-float Recording::longitude() const
-{
-    return sc_recording_resource_get_longitude(resource());
+    return sc_recording_resource_get_location_id(resource());
 }
 
 int Recording::quality() const

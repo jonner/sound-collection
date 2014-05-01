@@ -5,6 +5,10 @@ libcore_a_SOURCES = \
                     src/GRefPtr.h \
                     src/identification-resource.c \
                     src/identification-resource.h \
+                    src/location.cc \
+                    src/location.h \
+                    src/location-resource.c \
+                    src/location-resource.h \
                     src/recording.cc \
                     src/recording.h \
                     src/recording-resource.c \

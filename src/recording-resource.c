@@ -30,10 +30,7 @@ struct _ScRecordingResourcePrivate {
     gint quality;
     char* recordist;
     GDateTime* date;
-    char* location;
-    gfloat latitude;
-    gfloat longitude;
-    char* country;
+    gint64 location_id;
     gfloat elevation;
     char* file;
     char* remarks;
@@ -46,10 +43,7 @@ enum {
     PROP_QUALITY,
     PROP_RECORDIST,
     PROP_DATE,
-    PROP_LOCATION,
-    PROP_LATITUDE,
-    PROP_LONGITUDE,
-    PROP_COUNTRY,
+    PROP_LOCATION_ID,
     PROP_ELEVATION,
     PROP_FILE,
     PROP_REMARKS
@@ -61,8 +55,6 @@ static void sc_recording_resource_finalize(GObject* object)
 {
     ScRecordingResource* self = (ScRecordingResource*)object;
     g_free(self->priv->recordist);
-    g_free(self->priv->location);
-    g_free(self->priv->country);
     g_free(self->priv->file);
     g_free(self->priv->remarks);
     g_date_time_unref(self->priv->date);
@@ -91,19 +83,8 @@ static void sc_recording_resource_set_property(GObject* obj,
         g_free(self->priv->recordist);
         self->priv->recordist = g_value_dup_string(value);
         break;
-    case PROP_LOCATION:
-        g_free(self->priv->location);
-        self->priv->location = g_value_dup_string(value);
-        break;
-    case PROP_LATITUDE:
-        self->priv->latitude = g_value_get_float(value);
-        break;
-    case PROP_LONGITUDE:
-        self->priv->longitude = g_value_get_float(value);
-        break;
-    case PROP_COUNTRY:
-        g_free(self->priv->country);
-        self->priv->country = g_value_dup_string(value);
+    case PROP_LOCATION_ID:
+        self->priv->location_id = g_value_get_int64(value);
         break;
     case PROP_ELEVATION:
         self->priv->elevation = g_value_get_float(value);
@@ -144,17 +125,8 @@ static void sc_recording_resource_get_property(GObject* obj,
     case PROP_RECORDIST:
         g_value_set_string(value, self->priv->recordist);
         break;
-    case PROP_LOCATION:
-        g_value_set_string(value, self->priv->location);
-        break;
-    case PROP_LATITUDE:
-        g_value_set_float(value, self->priv->latitude);
-        break;
-    case PROP_LONGITUDE:
-        g_value_set_float(value, self->priv->longitude);
-        break;
-    case PROP_COUNTRY:
-        g_value_set_string(value, self->priv->country);
+    case PROP_LOCATION_ID:
+        g_value_set_int64(value, self->priv->location_id);
         break;
     case PROP_ELEVATION:
         g_value_set_float(value, self->priv->elevation);
@@ -193,14 +165,6 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
         g_param_spec_int64(
             "id", NULL, NULL, -1, G_MAXINT64, -1, G_PARAM_READWRITE));
 
-    /*
-
-
-    PROP_ELEVATION,
-    PROP_FILE,
-    PROP_REMARKS
-    */
-
     g_object_class_install_property(
         object_class,
         PROP_DURATION,
@@ -220,25 +184,10 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
 
     g_object_class_install_property(
         object_class,
-        PROP_LATITUDE,
-        g_param_spec_float(
-            "latitude", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -G_MAXFLOAT, G_PARAM_READWRITE));
-
-    g_object_class_install_property(
-        object_class,
-        PROP_LONGITUDE,
-        g_param_spec_float(
-            "longitude", NULL, NULL, -G_MAXFLOAT, G_MAXFLOAT, -G_MAXFLOAT, G_PARAM_READWRITE));
-
-    g_object_class_install_property(
-        object_class,
-        PROP_LOCATION,
-        g_param_spec_string("location", NULL, NULL, NULL, G_PARAM_READWRITE));
-
-    g_object_class_install_property(
-        object_class,
-        PROP_COUNTRY,
-        g_param_spec_string("country", NULL, NULL, NULL, G_PARAM_READWRITE));
+        PROP_LOCATION_ID,
+        g_param_spec_string("location-id", NULL, NULL, NULL, G_PARAM_READWRITE));
+            gom_resource_class_set_reference(
+        resource_class, "location-id", "locations", "id");
 
     g_object_class_install_property(
         object_class,
@@ -278,23 +227,9 @@ const char* sc_recording_resource_get_file(const ScRecordingResource* self)
     return self->priv->file;
 }
 
-const char* sc_recording_resource_get_location(const ScRecordingResource* self)
+gint64 sc_recording_resource_get_location_id(const ScRecordingResource* self)
 {
-    return self->priv->location;
-}
-const char* sc_recording_resource_get_country(const ScRecordingResource* self)
-{
-    return self->priv->country;
-}
-
-gfloat sc_recording_resource_get_latitude(const ScRecordingResource* self)
-{
-    return self->priv->latitude;
-}
-
-gfloat sc_recording_resource_get_longitude(const ScRecordingResource* self)
-{
-    return self->priv->longitude;
+    return self->priv->location_id;
 }
 
 gint sc_recording_resource_get_quality(const ScRecordingResource* self)

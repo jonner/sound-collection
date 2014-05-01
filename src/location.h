@@ -1,5 +1,5 @@
 /*
- * recording.h
+ * location.h
  * This file is part of SoundCollection
  *
  * Copyright (C) 2014 - Jonathon Jongsma
@@ -18,33 +18,28 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _RECORDING_H
-#define _RECORDING_H
+#ifndef _LOCATION_H
+#define _LOCATION_H
 
+#include <glibmm.h>
 #include <tr1/memory>
-#include <giomm.h>
-#include "recording-resource.h"
+#include "location-resource.h"
 
 namespace SC {
-class Recording {
+class Location {
 public:
-    static std::tr1::shared_ptr<Recording> create(ScRecordingResource* resource);
+    static std::tr1::shared_ptr<Location> create(ScLocationResource* resource);
 
     gint64 id() const;
-    Glib::RefPtr<Gio::File> file() const;
-    gint64 location_id() const;
-    int quality() const;
-    Glib::DateTime date() const;
-    Glib::ustring recordist() const;
-    float elevation() const;
-    Glib::ustring remarks() const;
-    float duration() const;
-
-    const ScRecordingResource* resource() const;
-    ScRecordingResource* resource();
+    Glib::ustring name() const;
+    Glib::ustring country() const;
+    float latitude() const;
+    float longitude() const;
 
 protected:
-    Recording(ScRecordingResource* resource);
+    Location(ScLocationResource* resource);
+    const ScLocationResource* resource() const;
+    ScLocationResource* resource();
 
 private:
     struct Priv;
@@ -52,5 +47,5 @@ private:
 };
 }
 
-#endif /* _RECORDING_H */
+#endif /* _LOCATION_H */
 

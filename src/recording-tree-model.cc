@@ -42,10 +42,6 @@ enum {
     COLUMN_QUALITY,
     COLUMN_RECORDIST,
     COLUMN_DATE,
-    COLUMN_LOCATION,
-    COLUMN_LATITUDE,
-    COLUMN_LONGITUDE,
-    COLUMN_COUNTRY,
     COLUMN_ELEVATION,
     COLUMN_FILE,
     COLUMN_REMARKS
@@ -59,10 +55,6 @@ RecordingModelColumns::RecordingModelColumns()
     add(quality);
     add(recordist);
     add(date);
-    add(location);
-    add(latitude);
-    add(longitude);
-    add(country);
     add(elevation);
     add(file);
     add(remarks);
@@ -81,9 +73,7 @@ struct RecordingTreeModel::Priv {
               g_object_new(SC_TYPE_RECORDING_RESOURCE,
                            "file",
                            loading,
-                           "location",
-                           loading,
-                           "country",
+                           "recordist",
                            loading,
                            NULL)))
         , stamp(1)
@@ -208,26 +198,6 @@ void RecordingTreeModel::get_value_vfunc(const iterator& iter,
         SETUP_VALUE(Gtk::TreeModelColumn<Glib::DateTime>, value, date);
         break;
     } break;
-    case COLUMN_LOCATION:
-        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>,
-                    value,
-                    make_string<Glib::ustring>(sc_recording_resource_get_location(recording)));
-        break;
-    case COLUMN_LATITUDE:
-        SETUP_VALUE(Gtk::TreeModelColumn<float>,
-                    value,
-                    sc_recording_resource_get_latitude(recording));
-        break;
-    case COLUMN_LONGITUDE:
-        SETUP_VALUE(Gtk::TreeModelColumn<float>,
-                    value,
-                    sc_recording_resource_get_longitude(recording));
-        break;
-    case COLUMN_COUNTRY:
-        SETUP_VALUE(Gtk::TreeModelColumn<Glib::ustring>,
-                    value,
-                    make_string<Glib::ustring>(sc_recording_resource_get_country(recording)));
-        break;
     case COLUMN_ELEVATION:
         SETUP_VALUE(Gtk::TreeModelColumn<float>,
                     value,

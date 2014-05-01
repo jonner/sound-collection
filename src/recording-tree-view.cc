@@ -26,14 +26,10 @@ struct RecordingTreeView::Priv {
     Glib::RefPtr<RecordingTreeModel> model;
     Gtk::TreeViewColumn id;
     Gtk::TreeViewColumn file;
-    Gtk::TreeViewColumn location;
-    Gtk::TreeViewColumn country;
 
     Priv()
         : id("ID")
         , file("File")
-        , location("Location")
-        , country("Country")
     {
         id.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
         id.set_fixed_width(40);
@@ -41,12 +37,6 @@ struct RecordingTreeView::Priv {
         file.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
         file.set_fixed_width(400);
         file.set_resizable(true);
-        location.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
-        location.set_fixed_width(200);
-        location.set_resizable(true);
-        country.set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
-        country.set_fixed_width(100);
-        country.set_resizable(true);
     }
 };
 
@@ -56,8 +46,6 @@ RecordingTreeView::RecordingTreeView()
     set_fixed_height_mode(true);
     append_column(m_priv->id);
     append_column(m_priv->file);
-    append_column(m_priv->location);
-    append_column(m_priv->country);
 }
 
 void RecordingTreeView::set_model(const Glib::RefPtr<RecordingTreeModel>& model)
@@ -70,7 +58,5 @@ void RecordingTreeView::set_model(const Glib::RefPtr<RecordingTreeModel>& model)
 
     m_priv->id.pack_start(model->columns().id);
     m_priv->file.pack_start(model->columns().file);
-    m_priv->location.pack_start(model->columns().location);
-    m_priv->country.pack_start(model->columns().country);
 }
 }
