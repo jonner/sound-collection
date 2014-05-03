@@ -18,6 +18,7 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gst/gst.h>
 #include "GRefPtr.h"
 #include "recording.h"
 
@@ -33,14 +34,84 @@ static Glib::ustring make_string(const char* cstr)
 struct Recording::Priv {
     WTF::GRefPtr<ScRecordingResource> resource;
 
+    struct QueryDurationData {
+        Recording::Priv* priv;
+        QueryDurationSlot slot;
+        GstElement* playbin;
+        GstBus* bus;
+
+        ~QueryDurationData()
+        {
+            if (playbin)
+                gst_object_unref(playbin);
+            if (bus)
+                gst_object_unref(bus);
+        }
+
+        bool try_update_duration()
+        {
+            gint64 duration = GST_CLOCK_TIME_NONE;
+            GstState state = GST_STATE_NULL;
+            if (gst_element_get_state(playbin, &state, NULL, GST_CLOCK_TIME_NONE) == GST_STATE_CHANGE_SUCCESS
+                && state == GST_STATE_PAUSED) {
+                if (gst_element_query_duration(playbin, GST_FORMAT_TIME, &duration)) {
+                    float seconds = static_cast<float>(GST_TIME_AS_MSECONDS(duration)) / 1000.0;
+                    Glib::signal_idle().connect_once(sigc::bind(slot, seconds));
+                    gst_bus_remove_signal_watch(bus);
+                    delete this;
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
     Priv(ScRecordingResource* resource)
         : resource(resource)
     {
+    }
+
+    static gboolean bus_watch(GstBus* bus, GstMessage* message, gpointer user_data)
+    {
+        QueryDurationData* data = reinterpret_cast<QueryDurationData*>(user_data);
+        if (message->type == GST_MESSAGE_STATE_CHANGED
+            || message->type == GST_MESSAGE_DURATION_CHANGED) {
+            if (data->try_update_duration()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void calculate_duration_async(const QueryDurationSlot& slot,
+                                  const Glib::RefPtr<Gio::File>& file)
+    {
+        QueryDurationData* data = new QueryDurationData();
+        data->slot = slot;
+        data->priv = this;
+        data->playbin = gst_element_factory_make("playbin", "playbin");
+        g_object_set(data->playbin, "uri", file->get_uri().c_str(), NULL);
+        gst_element_set_state(data->playbin, GST_STATE_PAUSED);
+        data->bus = gst_element_get_bus(data->playbin);
+        gst_bus_add_signal_watch(data->bus);
+        g_signal_connect(data->bus,
+                         "message",
+                         G_CALLBACK(Priv::bus_watch),
+                         this);
+        data->try_update_duration();
     }
 };
 
 Recording::Recording(ScRecordingResource* resource)
     : m_priv(new Priv(resource))
+{
+}
+
+Recording::Recording(const Glib::RefPtr<Gio::File>& file)
+    : m_priv(new Priv(SC_RECORDING_RESOURCE(g_object_new(SC_TYPE_RECORDING_RESOURCE,
+                                                         "file",
+                                                         file->get_path().c_str(),
+                                                         NULL))))
 {
 }
 
@@ -102,5 +173,10 @@ Glib::ustring Recording::remarks() const
 float Recording::duration() const
 {
     return sc_recording_resource_get_duration(resource());
+}
+
+void Recording::calculate_duration_async(const QueryDurationSlot& slot)
+{
+    m_priv->calculate_duration_async(slot, file());
 }
 }

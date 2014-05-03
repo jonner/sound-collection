@@ -40,6 +40,10 @@ public:
     Glib::ustring remarks() const;
     float duration() const;
 
+    typedef sigc::slot<void, float> QueryDurationSlot;
+    void calculate_duration_async(const QueryDurationSlot& slot);
+    float calculate_duration_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
+
     const ScRecordingResource* resource() const;
     ScRecordingResource* resource();
 

@@ -87,49 +87,19 @@ struct RecordingForm::Priv {
         remarks_entry.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
     }
 
-    static gboolean bus_watch(GstBus* bus, GstMessage* message, gpointer user_data)
+    void on_query_duration_finished(float seconds)
     {
-        Priv* priv = reinterpret_cast<Priv*>(user_data);
-        if (message->type == GST_MESSAGE_STATE_CHANGED
-            || message->type == GST_MESSAGE_DURATION_CHANGED) {
-            if (priv->try_update_duration()) {
-                // remove source
-                return false;
-            }
-        }
-        return true;
-    }
-
-    bool try_update_duration()
-    {
-        gint64 duration = GST_CLOCK_TIME_NONE;
-        GstState state = GST_STATE_NULL;
-        if (gst_element_get_state(playbin, &state, NULL, GST_CLOCK_TIME_NONE) == GST_STATE_CHANGE_SUCCESS
-            && state == GST_STATE_PAUSED) {
-            if (gst_element_query_duration(playbin, GST_FORMAT_TIME, &duration)) {
-                float seconds = static_cast<float>(GST_TIME_AS_MSECONDS(duration)) / 1000.0;
-                duration_value_label.set_text(Glib::ustring::format(seconds));
-                g_object_set(recording->resource(),
-                             "duration",
-                             seconds,
-                             NULL);
-                gom_resource_save_sync(GOM_RESOURCE(recording->resource()), 0);
-                return true;
-            }
-        }
-        return false;
+        duration_value_label.set_text(Glib::ustring::format(seconds));
+        g_object_set(recording->resource(),
+                     "duration",
+                     seconds,
+                     NULL);
+        gom_resource_save_sync(GOM_RESOURCE(recording->resource()), 0);
     }
 
     void on_update_duration_clicked()
     {
-        if (!playbin) {
-            playbin = gst_element_factory_make("playbin", "playbin");
-            g_object_set(playbin, "uri", recording->file()->get_uri().c_str(), NULL);
-            gst_element_set_state(playbin, GST_STATE_PAUSED);
-            bus = gst_element_get_bus(playbin);
-        }
-        if (!try_update_duration())
-            gst_bus_add_watch(bus, &Priv::bus_watch, this);
+        recording->calculate_duration_async(sigc::mem_fun(this, &Priv::on_query_duration_finished));
     }
 
     ~Priv()
