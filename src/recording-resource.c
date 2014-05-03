@@ -185,8 +185,8 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
     g_object_class_install_property(
         object_class,
         PROP_LOCATION_ID,
-        g_param_spec_string("location-id", NULL, NULL, NULL, G_PARAM_READWRITE));
-            gom_resource_class_set_reference(
+        g_param_spec_int64("location-id", NULL, NULL, 0, G_MAXINT64, 0, G_PARAM_READWRITE));
+    gom_resource_class_set_reference(
         resource_class, "location-id", "locations", "id");
 
     g_object_class_install_property(
