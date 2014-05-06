@@ -37,8 +37,6 @@ struct RecordingForm::Priv {
     Gtk::Label remarks_label;
     Gtk::ScrolledWindow remarks_scroll;
     Gtk::TextView remarks_entry;
-    GstElement* playbin;
-    GstBus* bus;
 
     Priv(const std::tr1::shared_ptr<Recording>& rec)
         : recording(rec)
@@ -50,8 +48,6 @@ struct RecordingForm::Priv {
         , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , duration_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , remarks_label("Remarks", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
-        , playbin(0)
-        , bus(0)
     {
         Pango::Attribute bold = Pango::Attribute::create_attr_weight(Pango::WEIGHT_BOLD);
         Pango::AttrList attrs;
@@ -123,10 +119,6 @@ struct RecordingForm::Priv {
 
     ~Priv()
     {
-        if (playbin)
-            gst_object_unref(playbin);
-        if (bus)
-            gst_object_unref(bus);
     }
 };
 
