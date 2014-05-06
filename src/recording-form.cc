@@ -85,6 +85,26 @@ struct RecordingForm::Priv {
         remarks_scroll.add(remarks_entry);
         remarks_entry.get_buffer()->set_text(recording->remarks());
         remarks_entry.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
+
+        // handlers for applying changes to the form
+        file_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_file_changed));
+        remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_remarks_changed));
+    }
+
+    void on_file_changed()
+    {
+        g_object_set(recording->resource(),
+                     "file",
+                     file_entry.get_text().c_str(),
+                     NULL);
+    }
+
+    void on_remarks_changed()
+    {
+        g_object_set(recording->resource(),
+                     "remarks",
+                     remarks_entry.get_buffer()->get_text().c_str(),
+                     NULL);
     }
 
     void on_query_duration_finished(float seconds)
@@ -94,7 +114,6 @@ struct RecordingForm::Priv {
                      "duration",
                      seconds,
                      NULL);
-        gom_resource_save_sync(GOM_RESOURCE(recording->resource()), 0);
     }
 
     void on_update_duration_clicked()

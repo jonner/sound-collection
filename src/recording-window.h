@@ -26,13 +26,15 @@
 #include "recording.h"
 
 namespace SC {
-class RecordingWindow : public Gtk::Window {
+class RecordingWindow : public Gtk::Dialog {
 public:
     RecordingWindow(const std::tr1::shared_ptr<Recording>& recording);
-    
+
     static void display(const std::tr1::shared_ptr<Recording>& recording);
 
 private:
+    void on_response(int response_id);
+
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;
 };

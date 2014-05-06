@@ -48,9 +48,12 @@ struct RecordingWindow::Priv {
 RecordingWindow::RecordingWindow(const std::tr1::shared_ptr<Recording>& recording)
     : m_priv(new Priv(recording))
 {
-    add(m_priv->layout);
+    get_content_area()->pack_start(m_priv->layout, true, true);
     set_titlebar(m_priv->titlebar);
     set_default_size(400, 400);
+    add_button("Cancel", Gtk::RESPONSE_CANCEL);
+    add_button("Save", Gtk::RESPONSE_APPLY);
+    signal_response().connect(sigc::mem_fun(this, &RecordingWindow::on_response));
 }
 
 static bool delete_recording_window(GdkEventAny* event G_GNUC_UNUSED,
@@ -66,5 +69,23 @@ void RecordingWindow::display(const std::tr1::shared_ptr<Recording>& recording)
     RecordingWindow* win = new RecordingWindow(recording);
     win->signal_delete_event().connect(sigc::bind(sigc::ptr_fun(delete_recording_window), win));
     win->show();
+}
+
+static void resource_saved(GObject* source, GAsyncResult* result, gpointer user_data)
+{
+    GError* error = 0;
+    GomResource* resource = reinterpret_cast<GomResource*>(source);
+    if (!gom_resource_save_finish(resource, result, &error)) {
+        g_warning("Failed to save resource: %s", error->message);
+        g_clear_error(&error);
+    }
+}
+
+void RecordingWindow::on_response(int response_id)
+{
+    if (response_id == Gtk::RESPONSE_APPLY) {
+        gom_resource_save_async(GOM_RESOURCE(m_priv->recording->resource()), resource_saved, this);
+    }
+    hide();
 }
 }
