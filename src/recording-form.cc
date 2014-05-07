@@ -34,6 +34,12 @@ struct RecordingForm::Priv {
     Gtk::Label duration_label;
     Gtk::Label duration_value_label;
     Gtk::Button duration_update_button;
+    Gtk::Label quality_label;
+    Gtk::SpinButton quality_entry;
+    Gtk::Label recordist_label;
+    Gtk::Entry recordist_entry;
+    Gtk::Label elevation_label;
+    Gtk::SpinButton elevation_entry;
     Gtk::Label remarks_label;
     Gtk::ScrolledWindow remarks_scroll;
     Gtk::TextView remarks_entry;
@@ -45,8 +51,11 @@ struct RecordingForm::Priv {
         , file_label("File", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , preview_label("Preview", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , preview_player(rec->file())
-        , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , duration_label("Duration (s)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , duration_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
+        , recordist_label("Recordist", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , quality_label("Quality (0-5)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , elevation_label("Elevation (m)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , remarks_label("Remarks", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
     {
         Pango::Attribute bold = Pango::Attribute::create_attr_weight(Pango::WEIGHT_BOLD);
@@ -75,6 +84,29 @@ struct RecordingForm::Priv {
         duration_update_button.set_image_from_icon_name("reload");
         duration_update_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_update_duration_clicked));
         duration_update_button.set_hexpand(false);
+        recordist_label.show();
+        recordist_label.set_attributes(attrs);
+        recordist_entry.set_text(recording->recordist());
+        recordist_entry.show();
+        recordist_entry.set_hexpand(true);
+        quality_label.show();
+        quality_label.set_attributes(attrs);
+        quality_entry.show();
+        quality_entry.set_hexpand(true);
+        quality_entry.set_range(0.0, 5.0);
+        quality_entry.set_increments(1.0, 1.0);
+        quality_entry.set_digits(0);
+        quality_entry.set_numeric(true);
+        quality_entry.set_value(recording->quality());
+        elevation_label.show();
+        elevation_label.set_attributes(attrs);
+        elevation_entry.show();
+        elevation_entry.set_hexpand(true);
+        elevation_entry.set_range(-G_MAXFLOAT, G_MAXFLOAT);
+        elevation_entry.set_increments(20, 200);
+        elevation_entry.set_digits(1);
+        elevation_entry.set_numeric(true);
+        elevation_entry.set_value(recording->elevation());
         remarks_label.show();
         remarks_label.set_attributes(attrs);
         remarks_scroll.set_hexpand(true);
@@ -83,23 +115,27 @@ struct RecordingForm::Priv {
         remarks_entry.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
 
         // handlers for applying changes to the form
-        file_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_file_changed));
-        remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_remarks_changed));
+        file_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+        remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+        recordist_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+        quality_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+        elevation_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
     }
 
-    void on_file_changed()
+    void on_property_changed()
     {
+        g_debug("Updating resource: quality=%i, elevation=%g", quality_entry.get_value_as_int(), elevation_entry.get_value());
         g_object_set(recording->resource(),
                      "file",
                      file_entry.get_text().c_str(),
-                     NULL);
-    }
-
-    void on_remarks_changed()
-    {
-        g_object_set(recording->resource(),
                      "remarks",
                      remarks_entry.get_buffer()->get_text().c_str(),
+                     "recordist",
+                     recordist_entry.get_text().c_str(),
+                     "quality",
+                     static_cast<int>(quality_entry.get_value_as_int()),
+                     "elevation",
+                     static_cast<float>(elevation_entry.get_value()),
                      NULL);
     }
 
@@ -138,7 +174,13 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach(m_priv->duration_label, 0, 3, 1, 1);
     attach(m_priv->duration_value_label, 1, 3, 1, 1);
     attach(m_priv->duration_update_button, 2, 3, 1, 1);
-    attach(m_priv->remarks_label, 0, 4, 1, 1);
-    attach(m_priv->remarks_scroll, 0, 5, 4, 4);
+    attach(m_priv->recordist_label, 0, 4, 1, 1);
+    attach(m_priv->recordist_entry, 1, 4, 3, 1);
+    attach(m_priv->quality_label, 0, 5, 1, 1);
+    attach(m_priv->quality_entry, 1, 5, 3, 1);
+    attach(m_priv->elevation_label, 0, 6, 1, 1);
+    attach(m_priv->elevation_entry, 1, 6, 3, 1);
+    attach(m_priv->remarks_label, 0, 7, 1, 1);
+    attach(m_priv->remarks_scroll, 0, 8, 4, 4);
 }
 }
