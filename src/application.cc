@@ -23,10 +23,11 @@
 #include <gst/gst.h>
 
 #include "application.h"
+#include "equipment-resource.h"
 #include "GRefPtr.h"
-#include "main-window.h"
 #include "identification-resource.h"
 #include "location-resource.h"
+#include "main-window.h"
 #include "recording-resource.h"
 #include "species-resource.h"
 
@@ -91,7 +92,8 @@ int Application::on_command_line(
 static GType repository_types[] = { SC_TYPE_RECORDING_RESOURCE,
                                     SC_TYPE_SPECIES_RESOURCE,
                                     SC_TYPE_IDENTIFICATION_RESOURCE,
-                                    SC_TYPE_LOCATION_RESOURCE };
+                                    SC_TYPE_LOCATION_RESOURCE,
+                                    SC_TYPE_EQUIPMENT_RESOURCE };
 
 void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
 {

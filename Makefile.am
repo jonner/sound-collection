@@ -3,6 +3,8 @@ noinst_LIBRARIES = libcore.a libui.a
 libcore_a_SOURCES = \
                     src/GRefPtr.cpp \
                     src/GRefPtr.h \
+                    src/equipment-resource.c \
+                    src/equipment-resource.h \
                     src/identification-resource.c \
                     src/identification-resource.h \
                     src/location.cc \
