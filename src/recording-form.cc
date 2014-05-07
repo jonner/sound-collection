@@ -29,6 +29,7 @@ struct RecordingForm::Priv {
     Gtk::Label id_value_label;
     Gtk::Label file_label;
     Gtk::Entry file_entry;
+    Gtk::Button file_open_button;
     Gtk::Label preview_label;
     SimpleAudioPlayer preview_player;
     Gtk::Label duration_label;
@@ -71,6 +72,9 @@ struct RecordingForm::Priv {
         file_entry.set_text(recording->file()->get_path());
         file_entry.show();
         file_entry.set_hexpand(true);
+        file_open_button.set_image_from_icon_name("document-open");
+        file_open_button.show();
+        file_open_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_file_open_clicked));
         preview_label.show();
         preview_label.set_attributes(attrs);
         preview_player.show();
@@ -122,6 +126,16 @@ struct RecordingForm::Priv {
         elevation_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
     }
 
+    void on_file_open_clicked()
+    {
+        Glib::RefPtr<Gio::File> file = recording->file();
+        Glib::RefPtr<Gio::AppInfo> appinfo = file->query_default_handler();
+        if (appinfo)
+            appinfo->launch(file);
+        else
+            g_warning("Unable to launch file");
+    }
+
     void on_property_changed()
     {
         g_debug("Updating resource: quality=%i, elevation=%g", quality_entry.get_value_as_int(), elevation_entry.get_value());
@@ -168,7 +182,8 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach(m_priv->id_label, 0, 0, 1, 1);
     attach(m_priv->id_value_label, 1, 0, 1, 1);
     attach(m_priv->file_label, 0, 1, 1, 1);
-    attach(m_priv->file_entry, 1, 1, 3, 1);
+    attach(m_priv->file_entry, 1, 1, 2, 1);
+    attach(m_priv->file_open_button, 3, 1, 1, 1);
     attach(m_priv->preview_label, 0, 2, 1, 1);
     attach(m_priv->preview_player, 1, 2, 1, 1);
     attach(m_priv->duration_label, 0, 3, 1, 1);
