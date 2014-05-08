@@ -41,8 +41,9 @@ public:
     float duration() const;
 
     typedef sigc::slot<void, float> QueryDurationSlot;
-    void calculate_duration_async(const QueryDurationSlot& slot);
-    float calculate_duration_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
+    void calculate_duration_async(const Gio::SlotAsyncReady& slot);
+    bool calculate_duration_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
+                                   float& duration);
 
     const ScRecordingResource* resource() const;
     ScRecordingResource* resource();
