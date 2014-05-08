@@ -57,7 +57,8 @@ static void sc_recording_resource_finalize(GObject* object)
     g_free(self->priv->recordist);
     g_free(self->priv->file);
     g_free(self->priv->remarks);
-    g_date_time_unref(self->priv->date);
+    if (self->priv->date)
+        g_date_time_unref(self->priv->date);
 
     G_OBJECT_CLASS(sc_recording_resource_parent_class)->finalize(object);
 }
