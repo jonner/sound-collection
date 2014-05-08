@@ -130,14 +130,6 @@ Recording::Recording(ScRecordingResource* resource)
 {
 }
 
-Recording::Recording(const Glib::RefPtr<Gio::File>& file)
-    : m_priv(new Priv(SC_RECORDING_RESOURCE(g_object_new(SC_TYPE_RECORDING_RESOURCE,
-                                                         "file",
-                                                         file->get_path().c_str(),
-                                                         NULL))))
-{
-}
-
 gint64 Recording::id() const
 {
     return sc_recording_resource_get_id(resource());
