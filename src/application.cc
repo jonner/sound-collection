@@ -77,7 +77,7 @@ int Application::on_command_line(
     std::string uri = m_priv->db->get_uri();
     g_debug("Opening db %s...", uri.c_str());
 
-    m_priv->adapter = gom_adapter_new();
+    m_priv->adapter = adoptGRef(gom_adapter_new());
     gom_adapter_open_async(m_priv->adapter.get(),
                            uri.c_str(),
                            Application::adapter_open_ready_proxy,
@@ -107,7 +107,7 @@ void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
     } else
         g_debug("Opened adapter");
 
-    m_priv->repository = gom_repository_new(m_priv->adapter.get());
+    m_priv->repository = adoptGRef(gom_repository_new(m_priv->adapter.get()));
     GList* types = 0;
     for (int i = 0; i < G_N_ELEMENTS(repository_types); i++) {
         types = g_list_prepend(types, GINT_TO_POINTER(repository_types[i]));

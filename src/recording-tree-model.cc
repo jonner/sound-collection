@@ -69,13 +69,13 @@ struct RecordingTreeModel::Priv {
     int stamp;
 
     Priv()
-        : empty_recording(SC_RECORDING_RESOURCE(
+        : empty_recording(adoptGRef(SC_RECORDING_RESOURCE(
               g_object_new(SC_TYPE_RECORDING_RESOURCE,
                            "file",
                            loading,
                            "recordist",
                            loading,
-                           NULL)))
+                           NULL))))
         , stamp(1)
     {
     }

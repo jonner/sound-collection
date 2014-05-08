@@ -92,15 +92,15 @@ void MainWindow::got_results(GomRepository* repository, GAsyncResult* result)
 {
     g_debug("%s", G_STRFUNC);
     GError* error = 0;
-    GomResourceGroup* results = gom_repository_find_finish(repository, result, &error);
+    WTF::GRefPtr<GomResourceGroup> results = adoptGRef(gom_repository_find_finish(repository, result, &error));
     if (error) {
         g_warning("Unable to find resources: %s", error->message);
         g_clear_error(&error);
         return;
     }
 
-    g_debug("total results: %i", gom_resource_group_get_count(results));
-    m_priv->tree_model->set_resource_group(results);
+    g_debug("total results: %i", gom_resource_group_get_count(results.get()));
+    m_priv->tree_model->set_resource_group(results.get());
     m_priv->tree_view.set_model(m_priv->tree_model);
     m_priv->tree_view.signal_row_activated().connect(
         sigc::mem_fun(this, &MainWindow::on_row_activated));
