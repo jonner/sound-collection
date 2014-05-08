@@ -157,8 +157,6 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
     g_type_class_add_private(object_class, sizeof(ScRecordingResourcePrivate));
 
     GomResourceClass* resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "recordings");
-    gom_resource_class_set_primary_key(resource_class, "id");
 
     g_object_class_install_property(
         object_class,
@@ -211,6 +209,9 @@ static void sc_recording_resource_class_init(ScRecordingResourceClass* klass)
         object_class,
         PROP_REMARKS,
         g_param_spec_string("remarks", NULL, NULL, NULL, G_PARAM_READWRITE));
+
+    gom_resource_class_set_table(resource_class, "recordings");
+    gom_resource_class_set_primary_key(resource_class, "id");
 }
 
 static void sc_recording_resource_init(ScRecordingResource* self)

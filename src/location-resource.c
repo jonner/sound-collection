@@ -121,8 +121,6 @@ static void sc_location_resource_class_init(ScLocationResourceClass* klass)
     g_type_class_add_private(object_class, sizeof(ScLocationResourcePrivate));
 
     GomResourceClass* resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "locations");
-    gom_resource_class_set_primary_key(resource_class, "id");
 
     g_object_class_install_property(
         object_class,
@@ -151,6 +149,9 @@ static void sc_location_resource_class_init(ScLocationResourceClass* klass)
         object_class,
         PROP_COUNTRY,
         g_param_spec_string("country", NULL, NULL, NULL, G_PARAM_READWRITE));
+
+    gom_resource_class_set_table(resource_class, "locations");
+    gom_resource_class_set_primary_key(resource_class, "id");
 }
 
 static void sc_location_resource_init(ScLocationResource* self)

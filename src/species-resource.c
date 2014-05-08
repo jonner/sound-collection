@@ -137,8 +137,6 @@ static void sc_species_resource_class_init(ScSpeciesResourceClass* klass)
     g_type_class_add_private(object_class, sizeof(ScSpeciesResourcePrivate));
 
     GomResourceClass* resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "species");
-    gom_resource_class_set_primary_key(resource_class, "id");
 
     g_object_class_install_property(
         object_class,
@@ -170,6 +168,9 @@ static void sc_species_resource_class_init(ScSpeciesResourceClass* klass)
         object_class,
         PROP_COMMON_NAME,
         g_param_spec_string("common-name", NULL, NULL, NULL, G_PARAM_READWRITE));
+
+    gom_resource_class_set_table(resource_class, "species");
+    gom_resource_class_set_primary_key(resource_class, "id");
 }
 
 static void sc_species_resource_init(ScSpeciesResource* self)

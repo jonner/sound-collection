@@ -113,8 +113,6 @@ static void sc_equipment_resource_class_init(ScEquipmentResourceClass* klass)
     g_type_class_add_private(object_class, sizeof(ScEquipmentResourcePrivate));
 
     GomResourceClass* resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "equipment");
-    gom_resource_class_set_primary_key(resource_class, "id");
 
     g_object_class_install_property(
         object_class,
@@ -137,6 +135,9 @@ static void sc_equipment_resource_class_init(ScEquipmentResourceClass* klass)
         PROP_CATEGORY,
         g_param_spec_int(
             "category", NULL, NULL, 1, EQUIPMENT_CATEGORY_LAST, 1, G_PARAM_READWRITE));
+
+    gom_resource_class_set_table(resource_class, "equipment");
+    gom_resource_class_set_primary_key(resource_class, "id");
 }
 
 static void sc_equipment_resource_init(ScEquipmentResource* self)
