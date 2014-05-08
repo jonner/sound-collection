@@ -35,13 +35,9 @@ public:
     void set_repository(GomRepository* repository);
 
 private:
-    void on_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-
-    static void got_results_proxy(GObject* source,
-                                  GAsyncResult* result,
-                                  gpointer user_data);
-    void got_results(GomRepository* repository, GAsyncResult* result);
     Glib::RefPtr<Application> application();
+    void on_import_clicked();
+    void on_import_file_done(const Glib::RefPtr<Gio::AsyncResult>& result);
 
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;

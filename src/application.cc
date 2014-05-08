@@ -48,6 +48,7 @@ struct Application::Priv {
     WTF::GRefPtr<GomAdapter> adapter;
     WTF::GRefPtr<GomRepository> repository;
     MainWindow window;
+    mutable sigc::signal<void> signal_database_changed;
 };
 
 Glib::RefPtr<Application> Application::create()
@@ -168,6 +169,11 @@ Glib::RefPtr<const Gio::File> Application::database() const
     return m_priv->db;
 }
 
+sigc::signal<void>& Application::signal_database_changed() const
+{
+    return m_priv->signal_database_changed;
+}
+
 struct ImportFileTask : public Task {
     Application* application;
     std::tr1::shared_ptr<Recording> recording;
@@ -187,6 +193,7 @@ bool Application::import_file_finish(const Glib::RefPtr<Gio::AsyncResult>& resul
     if (error)
         throw Glib::Error(error);
 
+    signal_database_changed().emit();
     return status;
 }
 
