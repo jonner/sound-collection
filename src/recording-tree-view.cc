@@ -60,11 +60,11 @@ void RecordingTreeView::set_model(const Glib::RefPtr<RecordingTreeModel>& model)
 {
     m_priv->model = model;
     Gtk::TreeView::set_model(model);
+    m_priv->id.clear();
+    m_priv->file.clear();
+    m_priv->duration.clear();
 
     if (!model) {
-        m_priv->id.clear();
-        m_priv->file.clear();
-        m_priv->duration.clear();
         return;
     }
 
