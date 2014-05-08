@@ -72,7 +72,7 @@ struct RecordingForm::Priv {
         file_entry.set_text(recording->file()->get_path());
         file_entry.show();
         file_entry.set_hexpand(true);
-        file_open_button.set_image_from_icon_name("document-open");
+        file_open_button.set_image_from_icon_name("applications-multimedia");
         file_open_button.show();
         file_open_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_file_open_clicked));
         preview_label.show();
