@@ -21,6 +21,7 @@
 #include <gst/gst.h>
 #include "GRefPtr.h"
 #include "recording.h"
+#include "task.h"
 
 namespace SC {
 
@@ -34,23 +35,23 @@ static Glib::ustring make_string(const char* cstr)
 struct Recording::Priv {
     WTF::GRefPtr<ScRecordingResource> resource;
 
-    struct QueryDurationData {
+    class CalculateDurationTask : public Task {
+    public:
         Recording::Priv* priv;
-        Gio::SlotAsyncReady slot;
         GstElement* playbin;
         GstBus* bus;
         float duration;
-        GTask* task; // weak ref
 
-        QueryDurationData(Priv* priv)
-            : priv(priv)
+        CalculateDurationTask(const Gio::SlotAsyncReady& slot, Recording::Priv* priv)
+            : Task(slot)
+            , priv(priv)
             , playbin(0)
             , bus(0)
             , duration(0.0)
         {
         }
 
-        ~QueryDurationData()
+        ~CalculateDurationTask()
         {
             if (playbin)
                 gst_object_unref(playbin);
@@ -66,20 +67,11 @@ struct Recording::Priv {
                 && state == GST_STATE_PAUSED) {
                 if (gst_element_query_duration(playbin, GST_FORMAT_TIME, &gstduration)) {
                     duration = static_cast<float>(GST_TIME_AS_MSECONDS(gstduration)) / 1000.0;
-                    g_task_return_boolean(task, true);
+                    g_task_return_boolean(task(), true);
                     return true;
                 }
             }
             return false;
-        }
-
-        static void async_ready_proxy(GObject* source,
-                                      GAsyncResult* result,
-                                      gpointer user_data)
-        {
-            QueryDurationData* data = reinterpret_cast<QueryDurationData*>(user_data);
-            Glib::RefPtr<Gio::AsyncResult> cpptype = Glib::wrap(result);
-            data->slot(cpptype);
         }
     };
 
@@ -90,10 +82,10 @@ struct Recording::Priv {
 
     static void bus_watch(GstBus* bus, GstMessage* message, gpointer user_data)
     {
-        QueryDurationData* data = reinterpret_cast<QueryDurationData*>(user_data);
+        CalculateDurationTask* task = reinterpret_cast<CalculateDurationTask*>(user_data);
         if (message->type == GST_MESSAGE_STATE_CHANGED
             || message->type == GST_MESSAGE_DURATION_CHANGED) {
-            data->try_update_duration();
+            task->try_update_duration();
         }
     }
 
@@ -101,27 +93,19 @@ struct Recording::Priv {
                                   const Glib::RefPtr<Gio::File>& file)
     {
         g_return_if_fail(file);
-        QueryDurationData* data = new QueryDurationData(this);
-        data->slot = slot;
-        data->playbin = gst_element_factory_make("playbin", "playbin");
-        g_object_set(data->playbin, "uri", file->get_uri().c_str(), NULL);
-        gst_element_set_state(data->playbin, GST_STATE_PAUSED);
-        data->bus = gst_element_get_bus(data->playbin);
-        data->task = g_task_new(0, 0, QueryDurationData::async_ready_proxy, data);
-        g_task_set_task_data(data->task, data, delete_data);
+        CalculateDurationTask* task = new CalculateDurationTask(slot, this);
+        task->playbin = gst_element_factory_make("playbin", "playbin");
+        g_object_set(task->playbin, "uri", file->get_uri().c_str(), NULL);
+        gst_element_set_state(task->playbin, GST_STATE_PAUSED);
+        task->bus = gst_element_get_bus(task->playbin);
 
-        if (!data->try_update_duration()) {
-            gst_bus_add_signal_watch(data->bus);
-            g_signal_connect(data->bus,
+        if (!task->try_update_duration()) {
+            gst_bus_add_signal_watch(task->bus);
+            g_signal_connect(task->bus,
                              "message",
                              G_CALLBACK(Priv::bus_watch),
-                             data);
+                             task);
         }
-    }
-
-    static void delete_data(gpointer d)
-    {
-        delete reinterpret_cast<QueryDurationData*>(d);
     }
 };
 
@@ -198,15 +182,15 @@ void Recording::calculate_duration_async(const Gio::SlotAsyncReady& slot)
 bool Recording::calculate_duration_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
                                           float& duration)
 {
-    GTask* task = G_TASK(result->gobj());
+    GTask* gtask = G_TASK(result->gobj());
     GError* error = 0;
-    Priv::QueryDurationData* data = reinterpret_cast<Priv::QueryDurationData*>(g_task_get_task_data(task));
+    Priv::CalculateDurationTask* task = reinterpret_cast<Priv::CalculateDurationTask*>(g_task_get_task_data(gtask));
 
-    bool status = g_task_propagate_boolean(task, &error);
+    bool status = g_task_propagate_boolean(gtask, &error);
     if (error)
         throw Glib::Error(error);
 
-    duration = data->duration;
+    duration = task->duration;
     return status;
 }
 }
