@@ -18,30 +18,32 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "header-label.h"
 #include "recording-form.h"
 #include "simple-audio-player.h"
+
 
 namespace SC {
 
 struct RecordingForm::Priv {
     std::tr1::shared_ptr<Recording> recording;
-    Gtk::Label id_label;
+    HeaderLabel id_label;
     Gtk::Label id_value_label;
-    Gtk::Label file_label;
+    HeaderLabel file_label;
     Gtk::Entry file_entry;
     Gtk::Button file_open_button;
-    Gtk::Label preview_label;
+    HeaderLabel preview_label;
     SimpleAudioPlayer preview_player;
-    Gtk::Label duration_label;
+    HeaderLabel duration_label;
     Gtk::Label duration_value_label;
     Gtk::Button duration_update_button;
-    Gtk::Label quality_label;
+    HeaderLabel quality_label;
     Gtk::SpinButton quality_entry;
-    Gtk::Label recordist_label;
+    HeaderLabel recordist_label;
     Gtk::Entry recordist_entry;
-    Gtk::Label elevation_label;
+    HeaderLabel elevation_label;
     Gtk::SpinButton elevation_entry;
-    Gtk::Label remarks_label;
+    HeaderLabel remarks_label;
     Gtk::ScrolledWindow remarks_scroll;
     Gtk::TextView remarks_entry;
     Gtk::Label date_label;
@@ -63,16 +65,11 @@ struct RecordingForm::Priv {
         , date_label("Date", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , date_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
     {
-        Pango::Attribute bold = Pango::Attribute::create_attr_weight(Pango::WEIGHT_BOLD);
-        Pango::AttrList attrs;
-        attrs.insert(bold);
         id_label.show();
-        id_label.set_attributes(attrs);
         id_value_label.set_text(Glib::ustring::format(recording->id()));
         id_value_label.show();
         id_value_label.set_hexpand(true);
         file_label.show();
-        file_label.set_attributes(attrs);
         file_entry.set_text(recording->file()->get_path());
         file_entry.show();
         file_entry.set_hexpand(true);
@@ -80,11 +77,9 @@ struct RecordingForm::Priv {
         file_open_button.show();
         file_open_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_file_open_clicked));
         preview_label.show();
-        preview_label.set_attributes(attrs);
         preview_player.show();
         preview_player.set_hexpand(false);
         duration_label.show();
-        duration_label.set_attributes(attrs);
         duration_value_label.set_text(Glib::ustring::format(recording->duration()));
         duration_value_label.show();
         duration_value_label.set_hexpand(false);
@@ -93,12 +88,10 @@ struct RecordingForm::Priv {
         duration_update_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_update_duration_clicked));
         duration_update_button.set_hexpand(false);
         recordist_label.show();
-        recordist_label.set_attributes(attrs);
         recordist_entry.set_text(recording->recordist());
         recordist_entry.show();
         recordist_entry.set_hexpand(true);
         quality_label.show();
-        quality_label.set_attributes(attrs);
         quality_entry.show();
         quality_entry.set_hexpand(true);
         quality_entry.set_range(0.0, 5.0);
@@ -107,7 +100,6 @@ struct RecordingForm::Priv {
         quality_entry.set_numeric(true);
         quality_entry.set_value(recording->quality());
         elevation_label.show();
-        elevation_label.set_attributes(attrs);
         elevation_entry.show();
         elevation_entry.set_hexpand(true);
         elevation_entry.set_range(-G_MAXFLOAT, G_MAXFLOAT);
@@ -116,7 +108,6 @@ struct RecordingForm::Priv {
         elevation_entry.set_numeric(true);
         elevation_entry.set_value(recording->elevation());
         remarks_label.show();
-        remarks_label.set_attributes(attrs);
         remarks_scroll.set_hexpand(true);
         remarks_scroll.add(remarks_entry);
         remarks_scroll.show();
@@ -124,7 +115,6 @@ struct RecordingForm::Priv {
         remarks_entry.get_buffer()->set_text(recording->remarks());
         remarks_entry.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
         date_label.show();
-        date_label.set_attributes(attrs);
         Glib::DateTime d = recording->date();
         date_value_label.show();
 

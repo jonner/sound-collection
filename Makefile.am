@@ -30,6 +30,8 @@ libcore_a_CXXFLAGS = $(libcore_a_CFLAGS)
 libui_a_SOURCES = \
                   src/application.cc \
                   src/application.h \
+                  src/header-label.cc \
+                  src/header-label.h \
                   src/import-dialog.h \
                   src/import-dialog.cc \
                   src/location-form.cc \
