@@ -20,6 +20,7 @@
 
 #include "application.h"
 #include "GRefPtr.h"
+#include "import-dialog.h"
 #include "main-window.h"
 #include "recording-tree-model.h"
 #include "recording-tree-view.h"
@@ -148,12 +149,18 @@ void MainWindow::on_import_file_done(const Glib::RefPtr<Gio::AsyncResult>& resul
 
 void MainWindow::on_import_clicked()
 {
-    Gtk::FileChooserDialog* chooser = new Gtk::FileChooserDialog(*this, "Choose a recording to import");
+    ImportDialog* chooser = new ImportDialog(*this);
     chooser->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
     chooser->add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-    if (chooser->run() == Gtk::RESPONSE_ACCEPT)
-        application()->import_file_async(chooser->get_file(),
-                                         sigc::mem_fun(this, &MainWindow::on_import_file_done));
+    if (chooser->run() == Gtk::RESPONSE_ACCEPT) {
+        std::vector<Glib::RefPtr<Gio::File> > files = chooser->get_files();
+        for (std::vector<Glib::RefPtr<Gio::File> >::iterator it = files.begin();
+             it != files.end();
+             ++it) {
+            application()->import_file_async(*it,
+                                             sigc::mem_fun(this, &MainWindow::on_import_file_done));
+        }
+    }
     chooser->hide();
     delete chooser;
 }
