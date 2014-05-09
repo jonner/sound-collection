@@ -49,8 +49,8 @@ private:
     void repository_migrate_finished(GomRepository* repository,
                                      GAsyncResult* res);
 
-    virtual int on_command_line(
-        const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line);
+    virtual void on_activate();
+    virtual void on_startup();
     void show();
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;

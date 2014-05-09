@@ -37,18 +37,39 @@
 
 namespace SC {
 
+const char* DB_NAME = "sound-collection.sqlite";
+
 struct Application::Priv {
+    int status;
+    Glib::RefPtr<Gio::File> base;
+    WTF::GRefPtr<GomAdapter> adapter;
+    WTF::GRefPtr<GomRepository> repository;
+    MainWindow window;
+    mutable sigc::signal<void> signal_database_changed;
+
     Priv()
         : status(0)
     {
     }
 
-    int status;
-    Glib::RefPtr<Gio::File> db;
-    WTF::GRefPtr<GomAdapter> adapter;
-    WTF::GRefPtr<GomRepository> repository;
-    MainWindow window;
-    mutable sigc::signal<void> signal_database_changed;
+    void setup_collection_directory(const std::string& base_path)
+    {
+        base = Gio::File::create_for_path(base_path);
+        try
+        {
+            if (!base->query_exists())
+                base->make_directory_with_parents();
+            base->get_child("audio")->make_directory();
+        }
+        catch (const Gio::Error& e)
+        {
+            if (!(e.domain() == G_IO_ERROR && e.code() == Gio::Error::EXISTS))
+            g_error("Unable to setup collection directory: %s(%i) - %s", g_quark_to_string(e.domain()), e.code(), e.what().c_str());
+        }
+
+        if (base->query_file_type() != Gio::FILE_TYPE_DIRECTORY)
+            g_error("Collection path %s is not a directory", base->get_path().c_str());
+    }
 };
 
 Glib::RefPtr<Application> Application::create()
@@ -58,26 +79,21 @@ Glib::RefPtr<Application> Application::create()
 
 Application::Application()
     : Gtk::Application("org.quotidian.SoundCollection",
-                       Gio::APPLICATION_HANDLES_COMMAND_LINE)
+                       Gio::APPLICATION_FLAGS_NONE)
     , m_priv(new Priv())
 {
 }
 
-int Application::on_command_line(
-    const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line)
+void Application::on_startup()
 {
-    int argc = 0;
-    char** argv = command_line->get_arguments(argc);
+    Gio::Application::on_startup();
     gst_init(NULL, NULL);
-    g_debug("Got commandline: %i elements", argc);
+    std::string collection_path = Glib::getenv("COLLECTION_BASE");
+    if (collection_path.empty())
+        collection_path = Glib::build_filename(Glib::get_user_data_dir(), "SoundCollection");
+    m_priv->setup_collection_directory(collection_path);
 
-    g_debug("argc = %i", argc);
-    if (argc > 1)
-        m_priv->db = command_line->create_file_for_arg(argv[1]);
-    else
-        m_priv->db = command_line->create_file_for_arg("sound-collection.sqlite");
-
-    std::string uri = m_priv->db->get_uri();
+    std::string uri = database()->get_uri();
     g_debug("Opening db %s...", uri.c_str());
 
     m_priv->adapter = adoptGRef(gom_adapter_new());
@@ -85,11 +101,11 @@ int Application::on_command_line(
                            uri.c_str(),
                            Application::adapter_open_ready_proxy,
                            this);
+}
 
-    g_strfreev(argv);
-
+void Application::on_activate()
+{
     add_window(m_priv->window);
-    return 0;
 }
 
 static GType repository_types[] = { SC_TYPE_RECORDING_RESOURCE,
@@ -166,7 +182,8 @@ void Application::show()
 
 Glib::RefPtr<const Gio::File> Application::database() const
 {
-    return m_priv->db;
+    g_return_val_if_fail(m_priv->base, Glib::RefPtr<const Gio::File>());
+    return m_priv->base->get_child(DB_NAME);
 }
 
 sigc::signal<void>& Application::signal_database_changed() const
