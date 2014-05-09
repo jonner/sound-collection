@@ -44,6 +44,8 @@ struct RecordingForm::Priv {
     Gtk::Label remarks_label;
     Gtk::ScrolledWindow remarks_scroll;
     Gtk::TextView remarks_entry;
+    Gtk::Label date_label;
+    Gtk::Label date_value_label;
 
     Priv(const std::tr1::shared_ptr<Recording>& rec)
         : recording(rec)
@@ -58,6 +60,8 @@ struct RecordingForm::Priv {
         , quality_label("Quality (0-5)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , elevation_label("Elevation (m)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , remarks_label("Remarks", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , date_label("Date", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , date_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
     {
         Pango::Attribute bold = Pango::Attribute::create_attr_weight(Pango::WEIGHT_BOLD);
         Pango::AttrList attrs;
@@ -115,8 +119,14 @@ struct RecordingForm::Priv {
         remarks_label.set_attributes(attrs);
         remarks_scroll.set_hexpand(true);
         remarks_scroll.add(remarks_entry);
+        remarks_scroll.show();
+        remarks_entry.show();
         remarks_entry.get_buffer()->set_text(recording->remarks());
         remarks_entry.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
+        date_label.show();
+        date_label.set_attributes(attrs);
+        Glib::DateTime d = recording->date();
+        date_value_label.show();
 
         // handlers for applying changes to the form
         file_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
@@ -190,22 +200,24 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     set_row_spacing(5);
     set_column_spacing(10);
     attach(m_priv->id_label, 0, 0, 1, 1);
-    attach(m_priv->id_value_label, 1, 0, 1, 1);
-    attach(m_priv->file_label, 0, 1, 1, 1);
-    attach(m_priv->file_entry, 1, 1, 2, 1);
-    attach(m_priv->file_open_button, 3, 1, 1, 1);
-    attach(m_priv->preview_label, 0, 2, 1, 1);
-    attach(m_priv->preview_player, 1, 2, 1, 1);
-    attach(m_priv->duration_label, 0, 3, 1, 1);
-    attach(m_priv->duration_value_label, 1, 3, 1, 1);
-    attach(m_priv->duration_update_button, 2, 3, 1, 1);
-    attach(m_priv->recordist_label, 0, 4, 1, 1);
-    attach(m_priv->recordist_entry, 1, 4, 3, 1);
-    attach(m_priv->quality_label, 0, 5, 1, 1);
-    attach(m_priv->quality_entry, 1, 5, 3, 1);
-    attach(m_priv->elevation_label, 0, 6, 1, 1);
-    attach(m_priv->elevation_entry, 1, 6, 3, 1);
-    attach(m_priv->remarks_label, 0, 7, 1, 1);
-    attach(m_priv->remarks_scroll, 0, 8, 4, 4);
+    attach_next_to(m_priv->id_value_label, m_priv->id_label, Gtk::POS_RIGHT, 1 ,1);
+    attach_next_to(m_priv->file_label, m_priv->id_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->file_entry, m_priv->file_label, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->file_open_button, m_priv->file_entry, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->preview_label, m_priv->file_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->preview_player, m_priv->preview_label, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->duration_label, m_priv->preview_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->duration_value_label, m_priv->duration_label, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->duration_update_button, m_priv->duration_value_label, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->recordist_label, m_priv->duration_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->recordist_entry, m_priv->recordist_label, Gtk::POS_RIGHT, 3, 1);
+    attach_next_to(m_priv->date_label, m_priv->recordist_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->date_value_label, m_priv->date_label, Gtk::POS_RIGHT, 3, 1);
+    attach_next_to(m_priv->quality_label, m_priv->date_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->quality_entry, m_priv->quality_label, Gtk::POS_RIGHT, 3, 1);
+    attach_next_to(m_priv->elevation_label, m_priv->quality_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->elevation_entry, m_priv->elevation_label, Gtk::POS_RIGHT, 3, 1);
+    attach_next_to(m_priv->remarks_label, m_priv->elevation_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->remarks_scroll, m_priv->remarks_label, Gtk::POS_BOTTOM, 4, 4);
 }
 }
