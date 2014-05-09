@@ -21,6 +21,7 @@
 #include <gio/gio.h>
 #include <gom/gom.h>
 #include <gst/gst.h>
+#include <iomanip>
 
 #include "application.h"
 #include "equipment-resource.h"
@@ -38,6 +39,7 @@
 namespace SC {
 
 const char* DB_NAME = "sound-collection.sqlite";
+const char* AUDIO_DIR = "audio";
 
 struct Application::Priv {
     int status;
@@ -57,14 +59,13 @@ struct Application::Priv {
         base = Gio::File::create_for_path(base_path);
         try
         {
-            if (!base->query_exists())
-                base->make_directory_with_parents();
-            base->get_child("audio")->make_directory();
+            base->make_directory_with_parents();
+            base->get_child(AUDIO_DIR)->make_directory();
         }
         catch (const Gio::Error& e)
         {
             if (!(e.domain() == G_IO_ERROR && e.code() == Gio::Error::EXISTS))
-            g_error("Unable to setup collection directory: %s(%i) - %s", g_quark_to_string(e.domain()), e.code(), e.what().c_str());
+                g_error("Unable to setup collection directory: %s(%i) - %s", g_quark_to_string(e.domain()), e.code(), e.what().c_str());
         }
 
         if (base->query_file_type() != Gio::FILE_TYPE_DIRECTORY)
@@ -180,6 +181,11 @@ void Application::show()
     m_priv->window.show();
 }
 
+Glib::RefPtr<const Gio::File> Application::base() const
+{
+    return m_priv->base;
+}
+
 Glib::RefPtr<const Gio::File> Application::database() const
 {
     g_return_val_if_fail(m_priv->base, Glib::RefPtr<const Gio::File>());
@@ -194,6 +200,7 @@ sigc::signal<void>& Application::signal_database_changed() const
 struct ImportFileTask : public Task {
     Application* application;
     std::tr1::shared_ptr<Recording> recording;
+    Glib::RefPtr<Gio::File> destfile;
 
     ImportFileTask(Application* app, const Gio::SlotAsyncReady& slot)
         : Task(slot)
@@ -214,6 +221,49 @@ bool Application::import_file_finish(const Glib::RefPtr<Gio::AsyncResult>& resul
     return status;
 }
 
+void resource_save_again_ready_proxy(GObject* source,
+                                     GAsyncResult* result,
+                                     gpointer user_data)
+{
+    ImportFileTask* task = reinterpret_cast<ImportFileTask*>(user_data);
+    GError* error = 0;
+    GomResource* resource = GOM_RESOURCE(source);
+    if (!gom_resource_save_finish(resource, result, &error)) {
+        g_task_return_error(task->task(), error);
+        return;
+    }
+    g_debug("updated resource %i", task->recording->id());
+    g_task_return_boolean(task->task(), true);
+}
+
+void on_file_copy_ready(const Glib::RefPtr<Gio::AsyncResult>& result,
+                        const Glib::RefPtr<Gio::File>& f,
+                        ImportFileTask* task)
+{
+    try
+    {
+        if (!f->copy_finish(result))
+            g_warning("copy_finish failed");
+    }
+    catch (const Glib::Error& e)
+    {
+        g_warning("Unable to copy file: %s", e.what().c_str());
+        // copying file failed after we already inserted into the DB, so remove it
+        gom_resource_delete_async(GOM_RESOURCE(task->recording->resource()), 0, 0);
+    }
+
+    g_debug("copied file to %s", f->get_path().c_str());
+    g_object_set(task->recording->resource(),
+                 "file",
+                 task->destfile->get_path().c_str(),
+                 "remarks",
+                 f->get_path().c_str(),
+                 NULL);
+    gom_resource_save_async(GOM_RESOURCE(task->recording->resource()),
+                            resource_save_again_ready_proxy,
+                            task);
+}
+
 void resource_save_ready_proxy(GObject* source,
                                GAsyncResult* result,
                                gpointer user_data)
@@ -226,8 +276,21 @@ void resource_save_ready_proxy(GObject* source,
         return;
     }
 
-    g_debug("saved resource");
-    g_task_return_boolean(task->task(), true);
+    std::string filename = task->recording->file()->get_path();
+    std::string extension;
+    size_t pos = filename.rfind('.');
+    if (pos != std::string::npos)
+        extension = filename.substr(pos);
+
+    std::string newfile = Glib::ustring::compose("SC%1%2",
+                                                 Glib::ustring::format(std::setfill(L'0'), std::setw(10), task->recording->id()),
+                                                 extension);
+
+    g_debug("saved recording %i to database", task->recording->id());
+
+    task->destfile = task->application->base()->get_child(AUDIO_DIR)->get_child(newfile);
+    Glib::RefPtr<Gio::File> f = task->recording->file();
+    f->copy_async(task->destfile, sigc::bind(sigc::bind(sigc::ptr_fun(on_file_copy_ready), task), f), Gio::FILE_COPY_BACKUP);
 }
 
 void on_calculate_duration_ready(const Glib::RefPtr<Gio::AsyncResult>& result,

@@ -32,6 +32,7 @@ class Application : public Gtk::Application {
 public:
     static Glib::RefPtr<SC::Application> create();
     Glib::RefPtr<const Gio::File> database() const;
+    Glib::RefPtr<const Gio::File> base() const;
     sigc::signal<void>& signal_database_changed() const;
     void import_file_async(const Glib::RefPtr<Gio::File>& file,
                            const Gio::SlotAsyncReady& slot);
