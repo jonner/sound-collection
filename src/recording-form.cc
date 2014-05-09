@@ -166,13 +166,14 @@ struct RecordingForm::Priv {
     void on_query_duration_finished(const Glib::RefPtr<Gio::AsyncResult>& result)
     {
         float seconds;
-        try {
-        recording->calculate_duration_finish(result, seconds);
+        try
+        {
+            recording->calculate_duration_finish(result, seconds);
         }
         catch (const Glib::Error& error)
         {
             g_warning("Failed to calculate duration for recording: %s",
-            error.what().c_str());
+                      error.what().c_str());
             return;
         }
         duration_value_label.set_text(Glib::ustring::format(seconds));
