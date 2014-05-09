@@ -338,6 +338,8 @@ void Application::import_file_async(const Glib::RefPtr<Gio::File>& file,
                      m_priv->repository.get(),
                      "file",
                      file->get_path().c_str(),
+                     "recordist",
+                     Glib::get_real_name().c_str(),
                      NULL)));
     task->recording = Recording::create(resource.get());
     task->recording->calculate_duration_async(
