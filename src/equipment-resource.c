@@ -118,7 +118,7 @@ static void sc_equipment_resource_class_init(ScEquipmentResourceClass* klass)
         object_class,
         PROP_ID,
         g_param_spec_int64(
-            "id", NULL, NULL, -1, G_MAXINT64, -1, G_PARAM_READWRITE));
+            "id", NULL, NULL, 0, G_MAXINT64, 0, G_PARAM_READWRITE));
 
     g_object_class_install_property(
         object_class,
