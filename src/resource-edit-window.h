@@ -1,5 +1,5 @@
 /*
- * recording-form.h
+ * resource-edit-window.h
  * This file is part of SoundCollection
  *
  * Copyright (C) 2014 - Jonathon Jongsma
@@ -18,25 +18,31 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _RECORDING_FORM_H
-#define _RECORDING_FORM_H
+#ifndef _RESOURCE_EDIT_WINDOW_H
+#define _RESOURCE_EDIT_WINDOW_H
 
+#include <gtkmm.h>
 #include <tr1/memory>
-#include "recording.h"
+
 #include "resource-edit-form.h"
 
 namespace SC {
 
-class RecordingForm : public ResourceEditForm {
+class ResourceEditWindow : public Gtk::Dialog {
 public:
-    RecordingForm(const std::tr1::shared_ptr<Recording>& recording);
-    virtual GomResource* resource();
+    ResourceEditWindow();
+    
+    void add_form(ResourceEditForm& form);
 
 private:
+    void on_response(int response_id);
+    static void on_resource_save_proxy(GObject* soruce, GAsyncResult* result, gpointer user_data);
+    void on_resource_save(GomResource* resource, GAsyncResult* result);
+
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;
 };
 }
 
-#endif /* _RECORDING_FORM_H */
+#endif /* _RESOURCE_EDIT_WINDOW_H */
 

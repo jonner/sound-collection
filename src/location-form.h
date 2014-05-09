@@ -21,15 +21,16 @@
 #ifndef _LOCATION_FORM_H
 #define _LOCATION_FORM_H
 
-#include <gtkmm.h>
 #include <tr1/memory>
 #include "location.h"
+#include "resource-edit-form.h"
 
 namespace SC {
 
-class LocationForm : public Gtk::Grid {
+class LocationForm : public ResourceEditForm {
 public:
     LocationForm(const std::tr1::shared_ptr<Location>& location);
+    virtual GomResource* resource();
 
 private:
     struct Priv;

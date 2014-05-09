@@ -44,6 +44,9 @@ libui_a_SOURCES = \
                   src/recording-tree-view.h \
                   src/recording-window.cc \
                   src/recording-window.h \
+                  src/resource-edit-form.h \
+                  src/resource-edit-window.cc \
+                  src/resource-edit-window.h \
                   src/simple-audio-player.cc \
                   src/simple-audio-player.h \
                   $(NULL)

@@ -21,12 +21,12 @@
 #ifndef _LOCATION_WINDOW_H
 #define _LOCATION_WINDOW_H
 
-#include <gtkmm.h>
 #include <tr1/memory>
 #include "location.h"
+#include "resource-edit-window.h"
 
 namespace SC {
-class LocationWindow : public Gtk::Window {
+class LocationWindow : public ResourceEditWindow {
 public:
     LocationWindow(const std::tr1::shared_ptr<Location>& location);
     

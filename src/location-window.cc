@@ -27,20 +27,15 @@ namespace SC {
 struct LocationWindow::Priv {
     Priv(const std::tr1::shared_ptr<Location>& rec)
         : location(rec)
-        , layout(Gtk::ORIENTATION_VERTICAL)
         , form(location)
     {
         titlebar.set_title(Glib::ustring::compose("Location %1", location->id()));
         titlebar.set_subtitle(location->name());
         titlebar.set_show_close_button(true);
         titlebar.show();
-        form.property_margin() = 10;
-        layout.pack_start(form);
-        layout.show_all();
     }
 
     std::tr1::shared_ptr<Location> location;
-    Gtk::Box layout;
     LocationForm form;
     Gtk::HeaderBar titlebar;
 };
@@ -48,9 +43,9 @@ struct LocationWindow::Priv {
 LocationWindow::LocationWindow(const std::tr1::shared_ptr<Location>& location)
     : m_priv(new Priv(location))
 {
-    add(m_priv->layout);
     set_titlebar(m_priv->titlebar);
     set_default_size(400, 400);
+    add_form(m_priv->form);
 }
 
 static bool delete_location_window(GdkEventAny* event G_GNUC_UNUSED,

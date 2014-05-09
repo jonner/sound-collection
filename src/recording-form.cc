@@ -221,4 +221,9 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach_next_to(m_priv->remarks_label, m_priv->elevation_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->remarks_scroll, m_priv->remarks_label, Gtk::POS_BOTTOM, 4, 4);
 }
+
+GomResource* RecordingForm::resource()
+{
+    return GOM_RESOURCE(m_priv->recording->resource());
+}
 }

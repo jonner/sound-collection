@@ -35,11 +35,11 @@ public:
     Glib::ustring country() const;
     float latitude() const;
     float longitude() const;
+    const ScLocationResource* resource() const;
+    ScLocationResource* resource();
 
 protected:
     Location(ScLocationResource* resource);
-    const ScLocationResource* resource() const;
-    ScLocationResource* resource();
 
 private:
     struct Priv;

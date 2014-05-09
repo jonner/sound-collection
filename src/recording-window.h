@@ -21,20 +21,18 @@
 #ifndef _RECORDING_WINDOW_H
 #define _RECORDING_WINDOW_H
 
-#include <gtkmm.h>
 #include <tr1/memory>
 #include "recording.h"
+#include "resource-edit-window.h"
 
 namespace SC {
-class RecordingWindow : public Gtk::Dialog {
+class RecordingWindow : public ResourceEditWindow {
 public:
     RecordingWindow(const std::tr1::shared_ptr<Recording>& recording);
 
     static void display(const std::tr1::shared_ptr<Recording>& recording);
 
 private:
-    void on_response(int response_id);
-
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;
 };

@@ -92,4 +92,10 @@ LocationForm::LocationForm(const std::tr1::shared_ptr<Location>& location)
     attach(m_priv->longitude_label, 0, 5, 1, 1);
     attach(m_priv->longitude_entry, 1, 5, 3, 1);
 }
+
+GomResource* LocationForm::resource()
+{
+    return GOM_RESOURCE(m_priv->location->resource());
+}
+
 }
