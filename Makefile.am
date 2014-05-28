@@ -89,8 +89,8 @@ test_CFLAGS = \
               $(NULL)
 
 test_LIBS = \
-            libcore.a \
             libui.a \
+            libcore.a \
             $(CORE_LIBS) \
             $(NULL)
 
