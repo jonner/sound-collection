@@ -31,7 +31,7 @@ struct RecordingForm::Priv {
     HeaderLabel id_label;
     Gtk::Label id_value_label;
     HeaderLabel file_label;
-    Gtk::Entry file_entry;
+    Gtk::Label file_value_label;
     Gtk::Button file_open_button;
     HeaderLabel preview_label;
     SimpleAudioPlayer preview_player;
@@ -55,6 +55,7 @@ struct RecordingForm::Priv {
         , id_label("ID", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , id_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , file_label("File", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , file_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , preview_label("Preview", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , preview_player(rec->file())
         , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
@@ -71,9 +72,10 @@ struct RecordingForm::Priv {
         id_value_label.show();
         id_value_label.set_hexpand(true);
         file_label.show();
-        file_entry.set_text(recording->file()->get_path());
-        file_entry.show();
-        file_entry.set_hexpand(true);
+        file_value_label.set_text(recording->file()->get_path());
+        file_value_label.show();
+        file_value_label.set_hexpand(true);
+        file_value_label.set_ellipsize(Pango::ELLIPSIZE_START);
         file_open_button.set_image_from_icon_name("applications-multimedia");
         file_open_button.show();
         file_open_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_file_open_clicked));
@@ -120,7 +122,6 @@ struct RecordingForm::Priv {
         date_value_label.show();
 
         // handlers for applying changes to the form
-        file_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         recordist_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         quality_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
@@ -141,8 +142,6 @@ struct RecordingForm::Priv {
     {
         g_debug("Updating resource: quality=%i, elevation=%g", quality_entry.get_value_as_int(), elevation_entry.get_value());
         g_object_set(recording->resource(),
-                     "file",
-                     file_entry.get_text().c_str(),
                      "remarks",
                      remarks_entry.get_buffer()->get_text().c_str(),
                      "recordist",
@@ -194,8 +193,8 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach(m_priv->id_label, 0, 0, 1, 1);
     attach_next_to(m_priv->id_value_label, m_priv->id_label, Gtk::POS_RIGHT, 1 ,1);
     attach_next_to(m_priv->file_label, m_priv->id_label, Gtk::POS_BOTTOM, 1, 1);
-    attach_next_to(m_priv->file_entry, m_priv->file_label, Gtk::POS_RIGHT, 1, 1);
-    attach_next_to(m_priv->file_open_button, m_priv->file_entry, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->file_value_label, m_priv->file_label, Gtk::POS_RIGHT, 1, 1);
+    attach_next_to(m_priv->file_open_button, m_priv->file_value_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->preview_label, m_priv->file_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->preview_player, m_priv->preview_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->duration_label, m_priv->preview_label, Gtk::POS_BOTTOM, 1, 1);
