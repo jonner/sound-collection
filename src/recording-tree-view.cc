@@ -19,14 +19,24 @@
  */
 
 #include "recording-tree-view.h"
+#include "util.h"
 
 namespace SC {
+
+static void duration_data_func(Gtk::CellRenderer* renderer, const Gtk::TreeModel::const_iterator& iter, const Glib::RefPtr<RecordingTreeModel>& model)
+{
+    float duration = iter->get_value(model->columns().duration);
+    Gtk::CellRendererText* crt = dynamic_cast<Gtk::CellRendererText*>(renderer);
+
+    crt->property_text() = format_duration(duration);
+}
 
 struct RecordingTreeView::Priv {
     Glib::RefPtr<RecordingTreeModel> model;
     Gtk::TreeViewColumn id;
     Gtk::TreeViewColumn file;
     Gtk::CellRendererText file_renderer;
+    Gtk::CellRendererText duration_renderer;
     Gtk::TreeViewColumn duration;
 
     Priv()
@@ -71,6 +81,8 @@ void RecordingTreeView::set_model(const Glib::RefPtr<RecordingTreeModel>& model)
     m_priv->id.pack_start(model->columns().id);
     m_priv->file.pack_start(m_priv->file_renderer);
     m_priv->file.set_renderer(m_priv->file_renderer, model->columns().file);
-    m_priv->duration.pack_start(model->columns().duration);
+    m_priv->duration.pack_start(m_priv->duration_renderer);
+    m_priv->duration.set_renderer(m_priv->duration_renderer, model->columns().duration);
+    m_priv->duration.set_cell_data_func(m_priv->duration_renderer, sigc::bind(sigc::ptr_fun(&duration_data_func), sigc::ref(model)));
 }
 }

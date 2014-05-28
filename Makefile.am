@@ -19,6 +19,8 @@ libcore_a_SOURCES = \
                     src/species-resource.h \
                     src/task.cc \
                     src/task.h \
+                    src/util.cc \
+                    src/util.h \
                     $(NULL)
 
 libcore_a_CFLAGS = \

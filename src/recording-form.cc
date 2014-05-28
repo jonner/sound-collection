@@ -21,6 +21,7 @@
 #include "header-label.h"
 #include "recording-form.h"
 #include "simple-audio-player.h"
+#include "util.h"
 
 
 namespace SC {
@@ -56,7 +57,7 @@ struct RecordingForm::Priv {
         , file_label("File", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , preview_label("Preview", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , preview_player(rec->file())
-        , duration_label("Duration (s)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , duration_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , recordist_label("Recordist", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , quality_label("Quality (0-5)", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
@@ -80,7 +81,7 @@ struct RecordingForm::Priv {
         preview_player.show();
         preview_player.set_hexpand(false);
         duration_label.show();
-        duration_value_label.set_text(Glib::ustring::format(recording->duration()));
+        duration_value_label.set_text(format_duration(recording->duration()));
         duration_value_label.show();
         duration_value_label.set_hexpand(false);
         duration_update_button.show();
