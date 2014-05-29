@@ -151,7 +151,7 @@ int Recording::quality() const
 
 Glib::DateTime Recording::date() const
 {
-    return Glib::wrap(sc_recording_resource_get_date(resource()));
+    return Glib::wrap(sc_recording_resource_get_date(resource()), true);
 }
 
 Glib::ustring Recording::recordist() const

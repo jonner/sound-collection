@@ -120,6 +120,11 @@ struct RecordingForm::Priv {
         date_label.show();
         Glib::DateTime d = recording->date();
         date_value_label.show();
+        if (d.to_unix() == 0) {
+            date_value_label.set_markup("<i>unspecified</i>");
+        } else {
+            date_value_label.set_text(d.format("%c"));
+        }
 
         // handlers for applying changes to the form
         remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
