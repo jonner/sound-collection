@@ -55,7 +55,7 @@ int main(int argc, char** argv)
         GomFilter* filter = gom_filter_new_eq(SC_TYPE_LOCATION_RESOURCE, "id", &id_value);
         recording = gom_repository_find_one_sync(repository, SC_TYPE_LOCATION_RESOURCE, filter, &error);
         if (!recording) {
-            g_error("Couldn't find recording %i: %s", id, error->message);
+            g_error("Couldn't find location %i: %s", id, error->message);
             g_clear_error(&error);
             return -1;
         }
