@@ -25,6 +25,7 @@
 
 
 #include <algorithm>
+#include <assert.h>
 
 #include <glib-object.h>
 #include <glib.h>
@@ -85,7 +86,7 @@ public:
 
     T*& outPtr()
     {
-        ASSERT(!m_ptr);
+        assert(!m_ptr);
         return m_ptr;
     }
 
