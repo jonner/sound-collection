@@ -24,15 +24,19 @@
 #include <tr1/memory>
 #include <giomm.h>
 #include "recording-resource.h"
+#include "location.h"
 
 namespace SC {
 class Recording {
 public:
+    typedef sigc::slot<void, const std::tr1::shared_ptr<Location> > LocationSlot;
+
     static std::tr1::shared_ptr<Recording> create(ScRecordingResource* resource);
 
     gint64 id() const;
     Glib::RefPtr<Gio::File> file() const;
     gint64 location_id() const;
+    void get_location_async(const LocationSlot& slot);
     int quality() const;
     Glib::DateTime date() const;
     Glib::ustring recordist() const;
@@ -52,6 +56,13 @@ protected:
     Recording(ScRecordingResource* resource);
 
 private:
+    static void got_location_proxy(GObject* source,
+                                   GAsyncResult* result,
+                                   gpointer user_data);
+    void got_location(GomRepository* repository,
+                      GAsyncResult* result,
+                      LocationSlot& slot);
+
     struct Priv;
     std::tr1::shared_ptr<Priv> m_priv;
 };

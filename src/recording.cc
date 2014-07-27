@@ -19,6 +19,7 @@
  */
 
 #include <gst/gst.h>
+#include <gom/gom.h>
 #include "GRefPtr.h"
 #include "recording.h"
 #include "task.h"
@@ -34,6 +35,7 @@ static Glib::ustring make_string(const char* cstr)
 
 struct Recording::Priv {
     WTF::GRefPtr<ScRecordingResource> resource;
+    std::tr1::shared_ptr<Location> location;
 
     class CalculateDurationTask : public Task {
     public:
@@ -142,6 +144,69 @@ std::tr1::shared_ptr<Recording> Recording::create(ScRecordingResource* resource)
 gint64 Recording::location_id() const
 {
     return sc_recording_resource_get_location_id(resource());
+}
+
+struct LocationUserData {
+    Recording* self;
+    Recording::LocationSlot slot;
+
+    LocationUserData(Recording* self, const Recording::LocationSlot& slot)
+        : self(self)
+        , slot(slot)
+    {
+    }
+};
+
+void Recording::got_location_proxy(GObject* source,
+                                   GAsyncResult* result,
+                                   gpointer user_data)
+{
+    GomRepository* repository = reinterpret_cast<GomRepository*>(source);
+    LocationUserData* data = reinterpret_cast<LocationUserData*>(user_data);
+    data->self->got_location(repository, result, data->slot);
+    delete data;
+}
+
+void Recording::got_location(GomRepository* repository, GAsyncResult* result, LocationSlot& slot)
+{
+    g_debug("%s", G_STRFUNC);
+    GError* error = 0;
+    WTF::GRefPtr<GomResource> resource = adoptGRef(gom_repository_find_one_finish(repository, result, &error));
+    if (error) {
+        g_warning("Unable to find location: %s", error->message);
+        g_clear_error(&error);
+        return;
+    }
+
+    g_warn_if_fail(resource.get());
+    if (resource)
+        m_priv->location = Location::create(SC_LOCATION_RESOURCE(resource.get()));
+
+    slot(m_priv->location);
+}
+
+void Recording::get_location_async(const LocationSlot& slot)
+{
+    if (m_priv->location) {
+        slot(m_priv->location);
+        return;
+    }
+
+    GRefPtr<GomRepository> repository;
+    g_object_get(resource(),
+                 "repository",
+                 &repository.outPtr(),
+                 NULL);
+
+    GValue id_value = G_VALUE_INIT;
+    g_value_init(&id_value, G_TYPE_INT64);
+    g_value_set_int64(&id_value, location_id());
+    g_debug("Looking up location %d", location_id());
+    gom_repository_find_one_async(repository.get(),
+                                  SC_TYPE_LOCATION_RESOURCE,
+                                  gom_filter_new_eq(SC_TYPE_LOCATION_RESOURCE, "id", &id_value),
+                                  &Recording::got_location_proxy,
+                                  new LocationUserData(this, slot));
 }
 
 int Recording::quality() const
