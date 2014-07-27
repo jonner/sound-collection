@@ -54,20 +54,20 @@ struct MainWindow::Priv {
         gom_repository_find_async(repository.get(),
                                   SC_TYPE_RECORDING_RESOURCE,
                                   0 /*m_priv->filter.get()*/,
-                                  Priv::got_results_proxy,
+                                  Priv::got_recordings_proxy,
                                   this);
     }
 
-    static void got_results_proxy(GObject* source,
+    static void got_recordings_proxy(GObject* source,
                                   GAsyncResult* result,
                                   gpointer user_data)
     {
         GomRepository* repository = reinterpret_cast<GomRepository*>(source);
         Priv* self = reinterpret_cast<Priv*>(user_data);
-        self->got_results(repository, result);
+        self->got_recordings(repository, result);
     }
 
-    void got_results(GomRepository* repository, GAsyncResult* result)
+    void got_recordings(GomRepository* repository, GAsyncResult* result)
     {
         g_debug("%s", G_STRFUNC);
         GError* error = 0;
