@@ -196,7 +196,7 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     set_row_spacing(5);
     set_column_spacing(10);
     attach(m_priv->id_label, 0, 0, 1, 1);
-    attach_next_to(m_priv->id_value_label, m_priv->id_label, Gtk::POS_RIGHT, 1 ,1);
+    attach_next_to(m_priv->id_value_label, m_priv->id_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->file_label, m_priv->id_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->file_value_label, m_priv->file_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->file_open_button, m_priv->file_value_label, Gtk::POS_RIGHT, 1, 1);
