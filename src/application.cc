@@ -136,7 +136,7 @@ void Application::adapter_open_ready_proxy(GObject* source_object,
 
 void Application::show()
 {
-    m_priv->window.set_repository(m_priv->repository->cobj());
+    m_priv->window.set_repository(m_priv->repository);
     m_priv->window.show();
 }
 

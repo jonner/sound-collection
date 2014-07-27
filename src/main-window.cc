@@ -51,7 +51,7 @@ struct MainWindow::Priv {
 
     void refresh_view()
     {
-        gom_repository_find_async(repository.get(),
+        gom_repository_find_async(repository->cobj(),
                                   SC_TYPE_RECORDING_RESOURCE,
                                   0 /*m_priv->filter.get()*/,
                                   Priv::got_recordings_proxy,
@@ -100,7 +100,7 @@ struct MainWindow::Priv {
     Glib::RefPtr<RecordingTreeModel> tree_model;
     RecordingTreeView tree_view;
     Gtk::Button import_button;
-    WTF::GRefPtr<GomRepository> repository;
+    std::tr1::shared_ptr<Repository> repository;
 };
 
 MainWindow::MainWindow()
@@ -120,7 +120,7 @@ MainWindow::MainWindow()
     m_priv->import_button.signal_clicked().connect(sigc::mem_fun(this, &MainWindow::on_import_clicked));
 }
 
-void MainWindow::set_repository(GomRepository* repository)
+void MainWindow::set_repository(const std::tr1::shared_ptr<Repository>& repository)
 {
     m_priv->repository = repository;
 

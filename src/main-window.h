@@ -21,9 +21,9 @@
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
 
-#include <gom/gom.h>
 #include <gtkmm.h>
 #include <tr1/memory>
+#include "repository.h"
 
 namespace SC {
 
@@ -32,7 +32,7 @@ class Application;
 class MainWindow : public Gtk::ApplicationWindow {
 public:
     MainWindow();
-    void set_repository(GomRepository* repository);
+    void set_repository(const std::tr1::shared_ptr<Repository>& repository);
 
 private:
     Glib::RefPtr<Application> application();
