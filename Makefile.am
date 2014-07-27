@@ -15,6 +15,8 @@ libcore_a_SOURCES = \
                     src/recording.h \
                     src/recording-resource.c \
                     src/recording-resource.h \
+                    src/repository.cc \
+                    src/repository.h \
                     src/species-resource.c \
                     src/species-resource.h \
                     src/task.cc \

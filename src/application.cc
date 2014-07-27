@@ -34,8 +34,6 @@
 #include "species-resource.h"
 #include "task.h"
 
-#define REPOSITORY_VERSION 1
-
 namespace SC {
 
 const char* DB_NAME = "sound-collection.sqlite";
@@ -45,9 +43,9 @@ struct Application::Priv {
     int status;
     Glib::RefPtr<Gio::File> base;
     WTF::GRefPtr<GomAdapter> adapter;
-    WTF::GRefPtr<GomRepository> repository;
     MainWindow window;
     mutable sigc::signal<void> signal_database_changed;
+    std::tr1::shared_ptr<Repository> repository;
 
     Priv()
         : status(0)
@@ -109,12 +107,6 @@ void Application::on_activate()
     add_window(m_priv->window);
 }
 
-static GType repository_types[] = { SC_TYPE_RECORDING_RESOURCE,
-                                    SC_TYPE_SPECIES_RESOURCE,
-                                    SC_TYPE_IDENTIFICATION_RESOURCE,
-                                    SC_TYPE_LOCATION_RESOURCE,
-                                    SC_TYPE_EQUIPMENT_RESOURCE };
-
 void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
 {
     g_debug("%s", G_STRFUNC);
@@ -127,17 +119,8 @@ void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
     } else
         g_debug("Opened adapter");
 
-    m_priv->repository = adoptGRef(gom_repository_new(m_priv->adapter.get()));
-    GList* types = 0;
-    for (int i = 0; i < G_N_ELEMENTS(repository_types); i++) {
-        types = g_list_prepend(types, GINT_TO_POINTER(repository_types[i]));
-    }
-    gom_repository_automatic_migrate_async(
-        m_priv->repository.get(),
-        REPOSITORY_VERSION,
-        types,
-        Application::repository_migrate_finished_proxy,
-        this);
+    m_priv->repository.reset(new Repository(m_priv->adapter.get()));
+    show();
 }
 
 void Application::adapter_open_ready_proxy(GObject* source_object,
@@ -150,34 +133,10 @@ void Application::adapter_open_ready_proxy(GObject* source_object,
     self->adapter_open_ready(adapter, res);
 }
 
-void Application::repository_migrate_finished_proxy(GObject* source_object,
-                                                    GAsyncResult* res,
-                                                    gpointer user_data)
-{
-    Application* self = static_cast<Application*>(user_data);
-    GomRepository* repository = reinterpret_cast<GomRepository*>(source_object);
-    self->repository_migrate_finished(repository, res);
-}
-
-void Application::repository_migrate_finished(GomRepository* repository,
-                                              GAsyncResult* res)
-{
-    g_debug("%s", G_STRFUNC);
-    GError* error = 0;
-    if (!gom_repository_automatic_migrate_finish(repository, res, &error)) {
-        g_warning("failed to migrate repository: %s", error->message);
-        g_error_free(error);
-        m_priv->status = -1;
-        quit();
-    } else
-        g_debug("Repository migrated");
-
-    show();
-}
 
 void Application::show()
 {
-    m_priv->window.set_repository(m_priv->repository.get());
+    m_priv->window.set_repository(m_priv->repository->cobj());
     m_priv->window.show();
 }
 

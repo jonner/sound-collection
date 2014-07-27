@@ -26,6 +26,7 @@
 #include <gom/gom.h>
 #include <gtkmm.h>
 #include <tr1/memory>
+#include "repository.h"
 
 namespace SC {
 class Application : public Gtk::Application {
@@ -37,6 +38,7 @@ public:
     void import_file_async(const Glib::RefPtr<Gio::File>& file,
                            const Gio::SlotAsyncReady& slot);
     bool import_file_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
+    Repository* repository();
 
 private:
     Application();
@@ -44,11 +46,6 @@ private:
                                          GAsyncResult* res,
                                          gpointer user_data);
     void adapter_open_ready(GomAdapter* adapter, GAsyncResult* res);
-    static void repository_migrate_finished_proxy(GObject* source_object,
-                                                  GAsyncResult* res,
-                                                  gpointer user_data);
-    void repository_migrate_finished(GomRepository* repository,
-                                     GAsyncResult* res);
 
     virtual void on_activate();
     virtual void on_startup();
