@@ -19,15 +19,16 @@
  */
 
 #include "header-label.h"
+#include "location-tree-model.h"
 #include "recording-form.h"
 #include "simple-audio-player.h"
 #include "util.h"
-
 
 namespace SC {
 
 struct RecordingForm::Priv {
     std::tr1::shared_ptr<Recording> recording;
+    std::tr1::shared_ptr<Repository> repository;
     HeaderLabel id_label;
     Gtk::Label id_value_label;
     HeaderLabel file_label;
@@ -49,9 +50,14 @@ struct RecordingForm::Priv {
     Gtk::TextView remarks_entry;
     Gtk::Label date_label;
     Gtk::Label date_value_label;
+    HeaderLabel location_label;
+    Gtk::ComboBox location_selector;
+    Glib::RefPtr<LocationTreeModel> location_model;
 
-    Priv(const std::tr1::shared_ptr<Recording>& rec)
+    Priv(const std::tr1::shared_ptr<Recording>& rec,
+         const std::tr1::shared_ptr<Repository>& repository)
         : recording(rec)
+        , repository(repository)
         , id_label("ID", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , id_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , file_label("File", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
@@ -66,6 +72,8 @@ struct RecordingForm::Priv {
         , remarks_label("Remarks", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , date_label("Date", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , date_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
+        , location_label("Location", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
+        , location_model(LocationTreeModel::create())
     {
         id_label.show();
         id_value_label.set_text(Glib::ustring::format(recording->id()));
@@ -110,6 +118,9 @@ struct RecordingForm::Priv {
         elevation_entry.set_digits(1);
         elevation_entry.set_numeric(true);
         elevation_entry.set_value(recording->elevation());
+        location_label.show();
+        location_selector.show();
+        location_selector.set_hexpand(true);
         remarks_label.show();
         remarks_scroll.set_hexpand(true);
         remarks_scroll.add(remarks_entry);
@@ -126,11 +137,79 @@ struct RecordingForm::Priv {
             date_value_label.set_text(d.format("%c"));
         }
 
+        repository->get_locations_async(sigc::mem_fun(this, &Priv::got_locations));
+
         // handlers for applying changes to the form
         remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         recordist_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         quality_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         elevation_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+        location_selector.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+    }
+
+    void set_active_location(const std::tr1::shared_ptr<Location>& location)
+    {
+        g_debug("%s: setting active location to %u", G_STRFUNC, location->id());
+        g_debug("Checking %u locations", location_model->children().size());
+        for (Gtk::TreeModel::iterator it = location_model->children().begin();
+             it != location_model->children().end();
+             ++it) {
+            guint64 id = (*it)[location_model->columns().id];
+            g_debug("checking location %u", id);
+            if (id == location->id()) {
+                location_selector.set_active(it);
+                break;
+            }
+        }
+    }
+
+    void got_location(const std::tr1::shared_ptr<Location>& location)
+    {
+        if (location) {
+            g_debug("Got location %s", location->name().c_str());
+            set_active_location(location);
+        } else
+            g_debug("Unable to get location");
+    }
+
+    void got_locations(const Glib::RefPtr<Gio::AsyncResult>& result)
+    {
+        try
+        {
+            GomResourceGroup* locations = repository->get_locations_finish(result);
+            gom_resource_group_fetch_async(locations, 0, gom_resource_group_get_count(locations), &Priv::on_locations_fetched_proxy, this);
+        }
+        catch (const Glib::Error& e)
+        {
+            g_warning(e.what().c_str());
+            return;
+        }
+    }
+
+    static void on_locations_fetched_proxy(GObject* source,
+                                           GAsyncResult* result,
+                                           gpointer user_data)
+    {
+        GError* error = 0;
+        Priv* self = reinterpret_cast<Priv*>(user_data);
+        GomResourceGroup* locations = GOM_RESOURCE_GROUP(source);
+        if (!gom_resource_group_fetch_finish(locations,
+                                             result,
+                                             &error)) {
+            g_error("%s", error->message);
+            g_clear_error(&error);
+            return;
+        }
+        self->on_locations_fetched(locations);
+    }
+
+    void on_locations_fetched(GomResourceGroup* locations)
+    {
+        location_model->set_resource_group(locations);
+        location_selector.set_model(location_model);
+        location_selector.pack_start(location_model->columns().name);
+
+        recording->get_location_async(sigc::mem_fun(this, &Priv::got_location));
     }
 
     void on_file_open_clicked()
@@ -146,6 +225,10 @@ struct RecordingForm::Priv {
     void on_property_changed()
     {
         g_debug("Updating resource: quality=%i, elevation=%g", quality_entry.get_value_as_int(), elevation_entry.get_value());
+        gint64 location_id = 0;
+        Gtk::TreeModel::iterator active_iter = location_selector.get_active();
+        if (active_iter)
+            location_id = (*active_iter)[location_model->columns().id];
         g_object_set(recording->resource(),
                      "remarks",
                      remarks_entry.get_buffer()->get_text().c_str(),
@@ -155,6 +238,8 @@ struct RecordingForm::Priv {
                      static_cast<int>(quality_entry.get_value_as_int()),
                      "elevation",
                      static_cast<float>(elevation_entry.get_value()),
+                     "location-id",
+                     static_cast<gint64>(location_id),
                      NULL);
     }
 
@@ -188,8 +273,9 @@ struct RecordingForm::Priv {
     }
 };
 
-RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
-    : m_priv(new Priv(recording))
+RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording,
+                             const std::tr1::shared_ptr<Repository>& repository)
+    : m_priv(new Priv(recording, repository))
 {
     set_column_homogeneous(false);
     set_row_homogeneous(true);
@@ -213,7 +299,9 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording)
     attach_next_to(m_priv->quality_entry, m_priv->quality_label, Gtk::POS_RIGHT, 3, 1);
     attach_next_to(m_priv->elevation_label, m_priv->quality_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->elevation_entry, m_priv->elevation_label, Gtk::POS_RIGHT, 3, 1);
-    attach_next_to(m_priv->remarks_label, m_priv->elevation_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->location_label, m_priv->elevation_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->location_selector, m_priv->location_label, Gtk::POS_RIGHT, 3, 1);
+    attach_next_to(m_priv->remarks_label, m_priv->location_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->remarks_scroll, m_priv->remarks_label, Gtk::POS_BOTTOM, 4, 4);
 }
 

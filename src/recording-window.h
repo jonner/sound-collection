@@ -23,14 +23,17 @@
 
 #include <tr1/memory>
 #include "recording.h"
+#include "repository.h"
 #include "resource-edit-window.h"
 
 namespace SC {
 class RecordingWindow : public ResourceEditWindow {
 public:
-    RecordingWindow(const std::tr1::shared_ptr<Recording>& recording);
+    RecordingWindow(const std::tr1::shared_ptr<Recording>& recording,
+                    const std::tr1::shared_ptr<Repository>& repository);
 
-    static void display(const std::tr1::shared_ptr<Recording>& recording);
+    static void display(const std::tr1::shared_ptr<Recording>& recording,
+                        const std::tr1::shared_ptr<Repository>& repository);
 
 private:
     struct Priv;

@@ -25,9 +25,10 @@
 namespace SC {
 
 struct RecordingWindow::Priv {
-    Priv(const std::tr1::shared_ptr<Recording>& rec)
+    Priv(const std::tr1::shared_ptr<Recording>& rec,
+         const std::tr1::shared_ptr<Repository>& repository)
         : recording(rec)
-        , form(recording)
+        , form(recording, repository)
     {
         titlebar.set_title(Glib::ustring::compose("Recording %1", recording->id()));
         titlebar.set_subtitle(recording->file()->get_path());
@@ -40,8 +41,9 @@ struct RecordingWindow::Priv {
     Gtk::HeaderBar titlebar;
 };
 
-RecordingWindow::RecordingWindow(const std::tr1::shared_ptr<Recording>& recording)
-    : m_priv(new Priv(recording))
+RecordingWindow::RecordingWindow(const std::tr1::shared_ptr<Recording>& recording,
+                                 const std::tr1::shared_ptr<Repository>& repository)
+    : m_priv(new Priv(recording, repository))
 {
     set_titlebar(m_priv->titlebar);
     set_default_size(400, 400);
@@ -56,11 +58,11 @@ static bool delete_recording_window(GdkEventAny* event G_GNUC_UNUSED,
     return false;
 }
 
-void RecordingWindow::display(const std::tr1::shared_ptr<Recording>& recording)
+void RecordingWindow::display(const std::tr1::shared_ptr<Recording>& recording,
+                              const std::tr1::shared_ptr<Repository>& repository)
 {
-    RecordingWindow* win = new RecordingWindow(recording);
+    RecordingWindow* win = new RecordingWindow(recording, repository);
     win->signal_delete_event().connect(sigc::bind(sigc::ptr_fun(delete_recording_window), win));
     win->show();
 }
-
 }

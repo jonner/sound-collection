@@ -30,7 +30,7 @@ namespace SC {
 
 struct LocationModelColumns : public Gtk::TreeModel::ColumnRecord {
     Gtk::TreeModelColumn<ScLocationResource*> resource;
-    Gtk::TreeModelColumn<gint64> id;
+    Gtk::TreeModelColumn<guint64> id;
     Gtk::TreeModelColumn<Glib::ustring> name;
     Gtk::TreeModelColumn<float> latitude;
     Gtk::TreeModelColumn<float> longitude;

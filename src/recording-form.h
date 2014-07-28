@@ -23,13 +23,15 @@
 
 #include <tr1/memory>
 #include "recording.h"
+#include "repository.h"
 #include "resource-edit-form.h"
 
 namespace SC {
 
 class RecordingForm : public ResourceEditForm {
 public:
-    RecordingForm(const std::tr1::shared_ptr<Recording>& recording);
+    RecordingForm(const std::tr1::shared_ptr<Recording>& recording,
+                  const std::tr1::shared_ptr<Repository>& repository);
     virtual GomResource* resource();
 
 private:

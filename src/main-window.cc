@@ -91,7 +91,7 @@ struct MainWindow::Priv {
         Gtk::TreeModel::iterator iter = tree_model->get_iter(path);
         ScRecordingResource* resource = (*iter)[tree_model->columns().resource];
         std::tr1::shared_ptr<Recording> recording = Recording::create(resource);
-        RecordingWindow::display(recording);
+        RecordingWindow::display(recording, repository);
     }
 
     Gtk::Box layout;

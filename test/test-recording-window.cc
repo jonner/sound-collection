@@ -21,11 +21,14 @@
 #include <gtkmm.h>
 #include <gom/gom.h>
 #include <gst/gst.h>
+#include <tr1/memory>
+
 #include "recording-window.h"
 #include "recording.h"
+#include "repository.h"
 
 static GomAdapter* adapter = 0;
-static GomRepository* repository = 0;
+static std::tr1::shared_ptr<SC::Repository> repository;
 static gint64 id = 0;
 
 int main(int argc, char** argv)
@@ -47,19 +50,19 @@ int main(int argc, char** argv)
         g_clear_error(&error);
         return -1;
     }
-    repository = gom_repository_new(adapter);
+    repository.reset(new SC::Repository(adapter));
     GValue id_value = G_VALUE_INIT;
     g_value_init(&id_value, G_TYPE_INT64);
     g_value_set_int64(&id_value, id);
     GomFilter* filter = gom_filter_new_eq(SC_TYPE_RECORDING_RESOURCE, "id", &id_value);
-    GomResource* recording = gom_repository_find_one_sync(repository, SC_TYPE_RECORDING_RESOURCE, filter, &error);
+    GomResource* recording = gom_repository_find_one_sync(repository->cobj(), SC_TYPE_RECORDING_RESOURCE, filter, &error);
     if (!recording) {
         g_error("Couldn't find recording %i: %s", id, error->message);
         g_clear_error(&error);
         return -1;
     }
 
-    SC::RecordingWindow win(SC::Recording::create(SC_RECORDING_RESOURCE(recording)));
+    SC::RecordingWindow win(SC::Recording::create(SC_RECORDING_RESOURCE(recording)), repository);
     app->run(win, 1, argv);
 
     return 0;
