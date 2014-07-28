@@ -48,7 +48,7 @@ struct RecordingForm::Priv {
     HeaderLabel remarks_label;
     Gtk::ScrolledWindow remarks_scroll;
     Gtk::TextView remarks_entry;
-    Gtk::Label date_label;
+    HeaderLabel date_label;
     Gtk::Label date_value_label;
     HeaderLabel location_label;
     Gtk::ComboBox location_selector;
