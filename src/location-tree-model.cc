@@ -148,8 +148,8 @@ static void iter_set_index(Gtk::TreeModel::iterator& iter, guint index)
     G_STMT_END
 
 void LocationTreeModel::get_value_vfunc(const iterator& iter,
-                                         int column,
-                                         Glib::ValueBase& value) const
+                                        int column,
+                                        Glib::ValueBase& value) const
 {
     if (!iter)
         return;
@@ -192,7 +192,7 @@ void LocationTreeModel::get_value_vfunc(const iterator& iter,
 }
 
 bool LocationTreeModel::iter_next_vfunc(const iterator& iter,
-                                         iterator& iter_next) const
+                                        iterator& iter_next) const
 {
     guint index = iter_get_index(iter);
     iter_next = make_iterator(index + 1);
@@ -200,7 +200,7 @@ bool LocationTreeModel::iter_next_vfunc(const iterator& iter,
 }
 
 bool LocationTreeModel::iter_children_vfunc(const iterator& parent,
-                                             iterator& iter) const
+                                            iterator& iter) const
 {
     iter = iterator(); /* invalid iter */
     return false;
@@ -225,22 +225,22 @@ int LocationTreeModel::iter_n_root_children_vfunc(void) const
 }
 
 bool LocationTreeModel::iter_nth_child_vfunc(const iterator& parent,
-                                              int n,
-                                              iterator& iter) const
+                                             int n,
+                                             iterator& iter) const
 {
     iter = iterator();
     return false;
 }
 
 bool LocationTreeModel::iter_nth_root_child_vfunc(int n,
-                                                   iterator& iter) const
+                                                  iterator& iter) const
 {
     iter = make_iterator(n);
     return iter;
 }
 
 bool LocationTreeModel::iter_parent_vfunc(const iterator& child,
-                                           iterator& iter) const
+                                          iterator& iter) const
 {
     // list model only -- no parents
     iter = iterator();
@@ -256,7 +256,7 @@ Gtk::TreeModel::Path LocationTreeModel::get_path_vfunc(const iterator& iter) con
 }
 
 bool LocationTreeModel::get_iter_vfunc(const Path& path,
-                                        iterator& iter) const
+                                       iterator& iter) const
 {
     iter = iterator();
     if (path.size() != 1) {
@@ -313,22 +313,22 @@ struct FetchLocationData {
 };
 
 void LocationTreeModel::location_fetch_done_proxy(GObject* source,
-                                                    GAsyncResult* result,
-                                                    gpointer user_data)
+                                                  GAsyncResult* result,
+                                                  gpointer user_data)
 {
     FetchLocationData* data = reinterpret_cast<FetchLocationData*>(user_data);
     GomResourceGroup* locations = reinterpret_cast<GomResourceGroup*>(source);
     data->self->location_fetch_done(locations,
-                                     result,
-                                     data->index,
-                                     data->count);
+                                    result,
+                                    data->index,
+                                    data->count);
     delete data;
 }
 
 void LocationTreeModel::location_fetch_done(GomResourceGroup* locations,
-                                              GAsyncResult* result,
-                                              guint index,
-                                              guint count)
+                                            GAsyncResult* result,
+                                            guint index,
+                                            guint count)
 {
     GError* error = 0;
     if (!gom_resource_group_fetch_finish(locations, result, &error)) {
@@ -350,7 +350,7 @@ void LocationTreeModel::fetch_location(guint index) const
                                    1,
                                    LocationTreeModel::location_fetch_done_proxy,
                                    new FetchLocationData(const_cast<SC::LocationTreeModel*>(this),
-                                                          index,
-                                                          1));
+                                                         index,
+                                                         1));
 }
 }
