@@ -118,8 +118,6 @@ MainWindow::MainWindow(const std::tr1::shared_ptr<Repository>& repository)
 
     set_titlebar(m_priv->header);
     set_default_size(800, 600);
-
-    m_priv->import_button.signal_clicked().connect(sigc::mem_fun(this, &MainWindow::on_import_clicked));
 }
 
 Glib::RefPtr<Application> MainWindow::application()
@@ -134,7 +132,7 @@ void MainWindow::on_import_file_done(const Glib::RefPtr<Gio::AsyncResult>& resul
 {
     try
     {
-        application()->import_file_finish(result);
+        m_priv->repository->import_file_finish(result);
     }
     catch (const Glib::Error& error)
     {
@@ -152,8 +150,8 @@ void MainWindow::on_import_clicked()
         for (std::vector<Glib::RefPtr<Gio::File> >::iterator it = files.begin();
              it != files.end();
              ++it) {
-            application()->import_file_async(*it,
-                                             sigc::mem_fun(this, &MainWindow::on_import_file_done));
+            m_priv->repository->import_file_async(*it,
+                                                  sigc::mem_fun(this, &MainWindow::on_import_file_done));
         }
     }
     chooser->hide();

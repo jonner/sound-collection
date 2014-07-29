@@ -34,6 +34,10 @@ public:
     void get_locations_async(const Gio::SlotAsyncReady& slot);
     GomResourceGroup* get_locations_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
     GomRepository* cobj();
+    sigc::signal<void>& signal_database_changed() const;
+    void import_file_async(const Glib::RefPtr<Gio::File>& file,
+                           const Gio::SlotAsyncReady& slot);
+    bool import_file_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
 
 private:
     static void repository_migrate_finished_proxy(GObject* source_object,
