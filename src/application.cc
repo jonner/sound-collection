@@ -83,6 +83,16 @@ Application::Application()
 {
 }
 
+Application::~Application()
+{
+    GError* error = 0;
+    if (!gom_adapter_close_sync(m_priv->adapter.get(), &error)) {
+        g_warning("Unable to close adapter: %s", error->message);
+        g_clear_error(&error);
+        return;
+    }
+}
+
 void Application::on_startup()
 {
     Gio::Application::on_startup();

@@ -42,6 +42,7 @@ public:
 
 private:
     Application();
+    ~Application();
     static void adapter_open_ready_proxy(GObject* source_object,
                                          GAsyncResult* res,
                                          gpointer user_data);
