@@ -34,8 +34,6 @@ struct RecordingForm::Priv {
     HeaderLabel file_label;
     Gtk::Label file_value_label;
     Gtk::Button file_open_button;
-    HeaderLabel preview_label;
-    SimpleAudioPlayer preview_player;
     HeaderLabel duration_label;
     Gtk::Label duration_value_label;
     Gtk::Button duration_update_button;
@@ -62,8 +60,6 @@ struct RecordingForm::Priv {
         , id_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , file_label("File", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , file_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
-        , preview_label("Preview", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
-        , preview_player(rec->file())
         , duration_label("Duration", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
         , duration_value_label("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
         , recordist_label("Recordist", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
@@ -87,9 +83,6 @@ struct RecordingForm::Priv {
         file_open_button.set_image_from_icon_name("applications-multimedia");
         file_open_button.show();
         file_open_button.signal_clicked().connect(sigc::mem_fun(this, &Priv::on_file_open_clicked));
-        preview_label.show();
-        preview_player.show();
-        preview_player.set_hexpand(false);
         duration_label.show();
         duration_value_label.set_text(format_duration(recording->duration()));
         duration_value_label.show();
@@ -286,9 +279,7 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording,
     attach_next_to(m_priv->file_label, m_priv->id_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->file_value_label, m_priv->file_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->file_open_button, m_priv->file_value_label, Gtk::POS_RIGHT, 1, 1);
-    attach_next_to(m_priv->preview_label, m_priv->file_label, Gtk::POS_BOTTOM, 1, 1);
-    attach_next_to(m_priv->preview_player, m_priv->preview_label, Gtk::POS_RIGHT, 1, 1);
-    attach_next_to(m_priv->duration_label, m_priv->preview_label, Gtk::POS_BOTTOM, 1, 1);
+    attach_next_to(m_priv->duration_label, m_priv->file_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->duration_value_label, m_priv->duration_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->duration_update_button, m_priv->duration_value_label, Gtk::POS_RIGHT, 1, 1);
     attach_next_to(m_priv->recordist_label, m_priv->duration_label, Gtk::POS_BOTTOM, 1, 1);
