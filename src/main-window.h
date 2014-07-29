@@ -31,8 +31,7 @@ class Application;
 
 class MainWindow : public Gtk::ApplicationWindow {
 public:
-    MainWindow();
-    void set_repository(const std::tr1::shared_ptr<Repository>& repository);
+    MainWindow(const std::tr1::shared_ptr<Repository>& repository);
 
 private:
     Glib::RefPtr<Application> application();

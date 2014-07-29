@@ -28,16 +28,18 @@
 
 namespace SC {
 struct MainWindow::Priv {
-    Priv()
+    Priv(const std::tr1::shared_ptr<Repository>& repository)
         : layout(Gtk::ORIENTATION_VERTICAL)
         , import_button("Import")
         , tree_model(RecordingTreeModel::create())
+        , repository(repository)
     {
         header.set_show_close_button(true);
         header.show();
         scroller.add(tree_view);
         tree_view.signal_row_activated().connect(
             sigc::mem_fun(this, &Priv::on_row_activated));
+        refresh_view();
     }
 
     void application_changed(MainWindow* window)
@@ -103,8 +105,8 @@ struct MainWindow::Priv {
     std::tr1::shared_ptr<Repository> repository;
 };
 
-MainWindow::MainWindow()
-    : m_priv(new Priv())
+MainWindow::MainWindow(const std::tr1::shared_ptr<Repository>& repository)
+    : m_priv(new Priv(repository))
 {
     add(m_priv->layout);
     m_priv->layout.pack_start(m_priv->scroller, true, true);
@@ -118,13 +120,6 @@ MainWindow::MainWindow()
     set_default_size(800, 600);
 
     m_priv->import_button.signal_clicked().connect(sigc::mem_fun(this, &MainWindow::on_import_clicked));
-}
-
-void MainWindow::set_repository(const std::tr1::shared_ptr<Repository>& repository)
-{
-    m_priv->repository = repository;
-
-    m_priv->refresh_view();
 }
 
 Glib::RefPtr<Application> MainWindow::application()

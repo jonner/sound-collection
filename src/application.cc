@@ -43,7 +43,6 @@ struct Application::Priv {
     int status;
     Glib::RefPtr<Gio::File> base;
     WTF::GRefPtr<GomAdapter> adapter;
-    MainWindow window;
     mutable sigc::signal<void> signal_database_changed;
     std::tr1::shared_ptr<Repository> repository;
 
@@ -114,7 +113,7 @@ void Application::on_startup()
 
 void Application::on_activate()
 {
-    add_window(m_priv->window);
+    hold();
 }
 
 void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
@@ -131,6 +130,7 @@ void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
 
     m_priv->repository.reset(new Repository(m_priv->adapter.get()));
     show();
+    release();
 }
 
 void Application::adapter_open_ready_proxy(GObject* source_object,
@@ -146,8 +146,9 @@ void Application::adapter_open_ready_proxy(GObject* source_object,
 
 void Application::show()
 {
-    m_priv->window.set_repository(m_priv->repository);
-    m_priv->window.show();
+    MainWindow* win = new MainWindow(m_priv->repository);
+    add_window(*win);
+    win->show();
 }
 
 Glib::RefPtr<const Gio::File> Application::base() const
