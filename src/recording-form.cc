@@ -23,6 +23,7 @@
 #include "recording-form.h"
 #include "simple-audio-player.h"
 #include "util.h"
+#include "quality-widget.h"
 
 namespace SC {
 
@@ -38,7 +39,7 @@ struct RecordingForm::Priv {
     Gtk::Label duration_value_label;
     Gtk::Button duration_update_button;
     HeaderLabel quality_label;
-    Gtk::SpinButton quality_entry;
+    QualityWidget quality_widget;
     HeaderLabel recordist_label;
     Gtk::Entry recordist_entry;
     HeaderLabel elevation_label;
@@ -96,13 +97,9 @@ struct RecordingForm::Priv {
         recordist_entry.show();
         recordist_entry.set_hexpand(true);
         quality_label.show();
-        quality_entry.show();
-        quality_entry.set_hexpand(true);
-        quality_entry.set_range(0.0, 5.0);
-        quality_entry.set_increments(1.0, 1.0);
-        quality_entry.set_digits(0);
-        quality_entry.set_numeric(true);
-        quality_entry.set_value(recording->quality());
+        quality_widget.show();
+        quality_widget.set_hexpand(false);
+        quality_widget.set_quality(recording->quality());
         elevation_label.show();
         elevation_entry.show();
         elevation_entry.set_hexpand(true);
@@ -135,7 +132,7 @@ struct RecordingForm::Priv {
         // handlers for applying changes to the form
         remarks_entry.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         recordist_entry.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
-        quality_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
+        quality_widget.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         elevation_entry.signal_value_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
         location_selector.signal_changed().connect(sigc::mem_fun(this, &Priv::on_property_changed));
     }
@@ -217,7 +214,7 @@ struct RecordingForm::Priv {
 
     void on_property_changed()
     {
-        g_debug("Updating resource: quality=%i, elevation=%g", quality_entry.get_value_as_int(), elevation_entry.get_value());
+        g_debug("Updating resource: quality=%i, elevation=%g", quality_widget.quality(), elevation_entry.get_value());
         gint64 location_id = 0;
         Gtk::TreeModel::iterator active_iter = location_selector.get_active();
         if (active_iter)
@@ -228,7 +225,7 @@ struct RecordingForm::Priv {
                      "recordist",
                      recordist_entry.get_text().c_str(),
                      "quality",
-                     static_cast<int>(quality_entry.get_value_as_int()),
+                     static_cast<int>(quality_widget.quality()),
                      "elevation",
                      static_cast<float>(elevation_entry.get_value()),
                      "location-id",
@@ -287,7 +284,7 @@ RecordingForm::RecordingForm(const std::tr1::shared_ptr<Recording>& recording,
     attach_next_to(m_priv->date_label, m_priv->recordist_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->date_value_label, m_priv->date_label, Gtk::POS_RIGHT, 3, 1);
     attach_next_to(m_priv->quality_label, m_priv->date_label, Gtk::POS_BOTTOM, 1, 1);
-    attach_next_to(m_priv->quality_entry, m_priv->quality_label, Gtk::POS_RIGHT, 3, 1);
+    attach_next_to(m_priv->quality_widget, m_priv->quality_label, Gtk::POS_RIGHT, 3, 1);
     attach_next_to(m_priv->elevation_label, m_priv->quality_label, Gtk::POS_BOTTOM, 1, 1);
     attach_next_to(m_priv->elevation_entry, m_priv->elevation_label, Gtk::POS_RIGHT, 3, 1);
     attach_next_to(m_priv->location_label, m_priv->elevation_label, Gtk::POS_BOTTOM, 1, 1);

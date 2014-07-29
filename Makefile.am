@@ -59,6 +59,8 @@ libui_a_SOURCES = \
                   src/resource-edit-window.h \
                   src/simple-audio-player.cc \
                   src/simple-audio-player.h \
+                  src/quality-widget.cc \
+                  src/quality-widget.h \
                   $(NULL)
 
 libui_a_CFLAGS = \
