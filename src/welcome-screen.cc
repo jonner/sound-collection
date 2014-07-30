@@ -18,6 +18,7 @@
  * along with SoundCollection. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "location-list.h"
 #include "recording-list.h"
 #include "welcome-screen.h"
 
@@ -28,12 +29,12 @@ struct WelcomeScreen::Priv {
     Gtk::Stack stack;
     Gtk::StackSwitcher switcher;
     RecordingList recordings;
-    Gtk::Label locations;
+    LocationList locations;
 
     Priv(const std::tr1::shared_ptr<Repository>& repository)
         : repository(repository)
         , recordings(repository)
-        , locations("Locations go here")
+        , locations(repository)
     {
         switcher.set_stack(stack);
 

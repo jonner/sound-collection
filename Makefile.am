@@ -40,8 +40,12 @@ libui_a_SOURCES = \
                   src/import-dialog.cc \
                   src/location-form.cc \
                   src/location-form.h \
+                  src/location-list.cc \
+                  src/location-list.h \
                   src/location-tree-model.cc \
                   src/location-tree-model.h \
+                  src/location-tree-view.cc \
+                  src/location-tree-view.h \
                   src/location-window.cc \
                   src/location-window.h \
                   src/main-window.cc \
