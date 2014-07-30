@@ -22,24 +22,21 @@
 #include "GRefPtr.h"
 #include "import-dialog.h"
 #include "main-window.h"
-#include "recording-tree-model.h"
-#include "recording-tree-view.h"
-#include "recording-window.h"
+#include "welcome-screen.h"
 
 namespace SC {
 struct MainWindow::Priv {
+    std::tr1::shared_ptr<Repository> repository;
+    Gtk::HeaderBar header;
+    WelcomeScreen welcome_screen;
+
     Priv(const std::tr1::shared_ptr<Repository>& repository)
-        : layout(Gtk::ORIENTATION_VERTICAL)
-        , import_button("Import")
-        , tree_model(RecordingTreeModel::create())
-        , repository(repository)
+        : repository(repository)
+        , welcome_screen(repository)
     {
         header.set_show_close_button(true);
         header.show();
-        scroller.add(tree_view);
-        tree_view.signal_row_activated().connect(
-            sigc::mem_fun(this, &Priv::on_row_activated));
-        refresh_view();
+        welcome_screen.show();
     }
 
     void application_changed(MainWindow* window)
@@ -47,72 +44,16 @@ struct MainWindow::Priv {
         Glib::RefPtr<Application> app = window->application();
         if (app) {
             header.set_subtitle(app->database()->get_path());
-            app->signal_database_changed().connect(sigc::mem_fun(this, &Priv::refresh_view));
         }
     }
-
-    void refresh_view()
-    {
-        gom_repository_find_async(repository->cobj(),
-                                  SC_TYPE_RECORDING_RESOURCE,
-                                  0 /*m_priv->filter.get()*/,
-                                  Priv::got_recordings_proxy,
-                                  this);
-    }
-
-    static void got_recordings_proxy(GObject* source,
-                                  GAsyncResult* result,
-                                  gpointer user_data)
-    {
-        GomRepository* repository = reinterpret_cast<GomRepository*>(source);
-        Priv* self = reinterpret_cast<Priv*>(user_data);
-        self->got_recordings(repository, result);
-    }
-
-    void got_recordings(GomRepository* repository, GAsyncResult* result)
-    {
-        g_debug("%s", G_STRFUNC);
-        GError* error = 0;
-        WTF::GRefPtr<GomResourceGroup> results = adoptGRef(gom_repository_find_finish(repository, result, &error));
-        if (error) {
-            g_warning("Unable to find resources: %s", error->message);
-            g_clear_error(&error);
-            return;
-        }
-
-        // FIXME: figure out why we need to unset the model before setting it
-        tree_view.set_model(Glib::RefPtr<RecordingTreeModel>());
-        g_debug("total results: %i", gom_resource_group_get_count(results.get()));
-        tree_model->set_resource_group(results.get());
-        tree_view.set_model(tree_model);
-    }
-
-    void on_row_activated(const Gtk::TreeModel::Path& path,
-                          Gtk::TreeViewColumn* column)
-    {
-        Gtk::TreeModel::iterator iter = tree_model->get_iter(path);
-        ScRecordingResource* resource = (*iter)[tree_model->columns().resource];
-        std::tr1::shared_ptr<Recording> recording = Recording::create(resource);
-        RecordingWindow::display(recording, repository);
-    }
-
-    Gtk::Box layout;
-    Gtk::HeaderBar header;
-    Gtk::ScrolledWindow scroller;
-    Glib::RefPtr<RecordingTreeModel> tree_model;
-    RecordingTreeView tree_view;
-    Gtk::Button import_button;
-    std::tr1::shared_ptr<Repository> repository;
 };
 
 MainWindow::MainWindow(const std::tr1::shared_ptr<Repository>& repository)
     : m_priv(new Priv(repository))
 {
-    add(m_priv->layout);
-    m_priv->layout.pack_start(m_priv->scroller, true, true);
-    m_priv->layout.pack_start(m_priv->import_button, false, true);
-    m_priv->layout.show_all();
+    add(m_priv->welcome_screen);
     m_priv->header.set_title("Sound Collection");
+
     property_application().signal_changed().connect(
         sigc::bind(sigc::mem_fun(m_priv.get(), &Priv::application_changed), this));
 

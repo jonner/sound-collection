@@ -48,6 +48,8 @@ libui_a_SOURCES = \
                   src/main-window.h \
                   src/recording-form.cc \
                   src/recording-form.h \
+                  src/recording-list.cc \
+                  src/recording-list.h \
                   src/recording-tree-model.cc \
                   src/recording-tree-model.h \
                   src/recording-tree-view.cc \
@@ -61,6 +63,8 @@ libui_a_SOURCES = \
                   src/simple-audio-player.h \
                   src/quality-widget.cc \
                   src/quality-widget.h \
+                  src/welcome-screen.cc \
+                  src/welcome-screen.h \
                   $(NULL)
 
 libui_a_CFLAGS = \
