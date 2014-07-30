@@ -45,8 +45,10 @@ static GType repository_types[] = { SC_TYPE_RECORDING_RESOURCE,
 struct Repository::Priv {
     WTF::GRefPtr<GomRepository> repository;
     mutable sigc::signal<void> signal_database_changed;
+    Glib::RefPtr<Gio::File> audio_dir;
 
-    Priv(GomAdapter* adapter)
+    Priv(GomAdapter* adapter, const Glib::ustring& audio_path)
+        : audio_dir(Gio::File::create_for_path(audio_path))
     {
         repository = adoptGRef(gom_repository_new(adapter));
 
@@ -63,8 +65,9 @@ struct Repository::Priv {
     }
 };
 
-Repository::Repository(GomAdapter* adapter)
-    : m_priv(new Priv(adapter))
+Repository::Repository(GomAdapter* adapter,
+                       const Glib::ustring& audio_path)
+    : m_priv(new Priv(adapter, audio_path))
 {
 }
 
@@ -295,5 +298,10 @@ void Repository::import_file_async(const Glib::RefPtr<Gio::File>& file,
     task->recording = Recording::create(resource.get());
     task->recording->calculate_duration_async(
         sigc::bind(sigc::ptr_fun(on_calculate_duration_ready), task));
+}
+
+Glib::RefPtr<Gio::File> Repository::audio_dir() const
+{
+    return m_priv->audio_dir;
 }
 }

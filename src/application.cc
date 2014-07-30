@@ -124,7 +124,8 @@ void Application::adapter_open_ready(GomAdapter* adapter, GAsyncResult* res)
     } else
         g_debug("Opened adapter");
 
-    m_priv->repository.reset(new Repository(m_priv->adapter.get()));
+    m_priv->repository.reset(new Repository(m_priv->adapter.get(),
+                                            m_priv->base->get_child(AUDIO_DIR)->get_path()));
     show();
     release();
 }

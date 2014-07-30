@@ -29,7 +29,7 @@
 namespace SC {
 class Repository {
 public:
-    Repository(GomAdapter* adapter);
+    Repository(GomAdapter* adapter, const Glib::ustring& audio_path);
 
     void get_locations_async(const Gio::SlotAsyncReady& slot);
     GomResourceGroup* get_locations_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
@@ -38,6 +38,7 @@ public:
     void import_file_async(const Glib::RefPtr<Gio::File>& file,
                            const Gio::SlotAsyncReady& slot);
     bool import_file_finish(const Glib::RefPtr<Gio::AsyncResult>& result);
+    Glib::RefPtr<Gio::File> audio_dir() const;
 
 private:
     static void repository_migrate_finished_proxy(GObject* source_object,

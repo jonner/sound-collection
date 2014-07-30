@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         g_clear_error(&error);
         return -1;
     }
-    repository.reset(new SC::Repository(adapter));
+    repository.reset(new SC::Repository(adapter, "/tmp"));
     GValue id_value = G_VALUE_INIT;
     g_value_init(&id_value, G_TYPE_INT64);
     g_value_set_int64(&id_value, id);
