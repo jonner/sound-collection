@@ -310,7 +310,7 @@ ScRecordingResource* RecordingTreeModel::get_recording(guint index) const
     if (recording) {
         return recording;
     }
-    g_debug("recording %u not fetched, fetching...", index);
+    //g_debug("recording %u not fetched, fetching...", index);
     fetch_recording(index);
     return m_priv->empty_recording.get();
 }
@@ -364,7 +364,7 @@ void RecordingTreeModel::recording_fetch_done(GomResourceGroup* recordings,
         return;
     }
 
-    g_debug("Recording %i fetched. signaling changed...", index);
+    //g_debug("Recording %i fetched. signaling changed...", index);
     Gtk::TreeModel::Path path;
     path.push_back(index);
     row_changed(path, make_iterator(index));

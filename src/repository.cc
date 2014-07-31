@@ -206,7 +206,7 @@ void on_file_copy_ready(const Glib::RefPtr<Gio::AsyncResult>& result,
         gom_resource_delete_async(GOM_RESOURCE(task->recording->resource()), 0, 0);
     }
 
-    g_debug("copied file to %s", f->get_path().c_str());
+    g_debug("copied file %s to %s", f->get_path().c_str(), task->destfile->get_path().c_str());
     g_object_set(task->recording->resource(),
                  "file",
                  task->destfile->get_path().c_str(),
