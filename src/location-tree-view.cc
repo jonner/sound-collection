@@ -58,7 +58,7 @@ void LocationTreeView::set_model(const Glib::RefPtr<LocationTreeModel>& model)
     m_priv->id.clear();
     m_priv->name.clear();
     m_priv->latitude.clear();
-    m_priv->latitude.clear();
+    m_priv->longitude.clear();
     m_priv->country.clear();
 
     if (!model) {
