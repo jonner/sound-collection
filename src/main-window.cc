@@ -20,7 +20,6 @@
 
 #include "application.h"
 #include "GRefPtr.h"
-#include "import-dialog.h"
 #include "main-window.h"
 #include "welcome-screen.h"
 
@@ -67,35 +66,5 @@ Glib::RefPtr<Application> MainWindow::application()
     Application* scapp = dynamic_cast<Application*>(app);
     g_debug("property_application: %p, cast to myapp: %p", app, scapp);
     return Glib::RefPtr<Application>::cast_dynamic(property_application().get_value());
-}
-
-void MainWindow::on_import_file_done(const Glib::RefPtr<Gio::AsyncResult>& result)
-{
-    try
-    {
-        m_priv->repository->import_file_finish(result);
-    }
-    catch (const Glib::Error& error)
-    {
-        g_warning("failed to import file: %s", error.what().c_str());
-    }
-}
-
-void MainWindow::on_import_clicked()
-{
-    ImportDialog* chooser = new ImportDialog(*this);
-    chooser->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-    chooser->add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-    if (chooser->run() == Gtk::RESPONSE_ACCEPT) {
-        std::vector<Glib::RefPtr<Gio::File> > files = chooser->get_files();
-        for (std::vector<Glib::RefPtr<Gio::File> >::iterator it = files.begin();
-             it != files.end();
-             ++it) {
-            m_priv->repository->import_file_async(*it,
-                                                  sigc::mem_fun(this, &MainWindow::on_import_file_done));
-        }
-    }
-    chooser->hide();
-    delete chooser;
 }
 }

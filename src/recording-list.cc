@@ -20,6 +20,7 @@
 
 #include "application.h"
 #include "GRefPtr.h"
+#include "import-dialog.h"
 #include "recording-list.h"
 #include "recording-tree-model.h"
 #include "recording-tree-view.h"
@@ -31,10 +32,14 @@ struct RecordingList::Priv {
     Glib::RefPtr<RecordingTreeModel> tree_model;
     RecordingTreeView tree_view;
     std::tr1::shared_ptr<Repository> repository;
+    Gtk::Button import_button;
+    Gtk::Box layout;
 
     Priv(const std::tr1::shared_ptr<Repository>& repository)
         : tree_model(RecordingTreeModel::create())
         , repository(repository)
+        , import_button("Import Recording")
+        , layout(Gtk::ORIENTATION_VERTICAL)
     {
         scroller.add(tree_view);
         tree_view.signal_row_activated().connect(
@@ -43,8 +48,16 @@ struct RecordingList::Priv {
         tree_view.show();
         refresh_view();
 
+        layout.show();
+        layout.pack_start(scroller, true, true);
+        import_button.show();
+        layout.pack_start(import_button, false, false);
+
         repository->signal_database_changed().connect(
             sigc::mem_fun(this, &Priv::refresh_view));
+
+        import_button.signal_clicked().connect(
+            sigc::mem_fun(this, &Priv::on_import_clicked));
     }
 
     void refresh_view()
@@ -91,12 +104,42 @@ struct RecordingList::Priv {
         std::tr1::shared_ptr<Recording> recording = Recording::create(resource);
         RecordingWindow::display(recording, repository);
     }
+
+    void on_import_file_done(const Glib::RefPtr<Gio::AsyncResult>& result)
+    {
+        try
+        {
+            repository->import_file_finish(result);
+        }
+        catch (const Glib::Error& error)
+        {
+            g_warning("failed to import file: %s", error.what().c_str());
+        }
+    }
+
+    void on_import_clicked()
+    {
+        ImportDialog* chooser = new ImportDialog(*dynamic_cast<Gtk::Window*>(layout.get_toplevel()));
+        chooser->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+        chooser->add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+        if (chooser->run() == Gtk::RESPONSE_ACCEPT) {
+            std::vector<Glib::RefPtr<Gio::File> > files = chooser->get_files();
+            for (std::vector<Glib::RefPtr<Gio::File> >::iterator it = files.begin();
+                 it != files.end();
+                 ++it) {
+                repository->import_file_async(*it,
+                                              sigc::mem_fun(this, &Priv::on_import_file_done));
+            }
+        }
+        chooser->hide();
+        delete chooser;
+    }
 };
 
 RecordingList::RecordingList(const std::tr1::shared_ptr<Repository>& repository)
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL)
     , m_priv(new Priv(repository))
 {
-    pack_start(m_priv->scroller);
+    pack_start(m_priv->layout);
 }
 }
